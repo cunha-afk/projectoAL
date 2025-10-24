@@ -4,8 +4,8 @@
     <header class="bg-white shadow-md fixed top-0 left-0 w-full z-50">
       <nav class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
         <div class="flex items-center space-x-3">
-          <img src="/images/logo.png" alt="Logo" class="h-10 w-auto" />
-          <span class="text-xl font-bold text-dark">AlojamentoLocal</span>
+          <img src="/images/logo.jpg" alt="Logo" class="h-10 w-auto" />
+          <span class="text-xl font-bold text-dark">Marão à Vista</span>
         </div>
         <ul class="hidden md:flex space-x-8 text-dark font-medium">
           <li><a href="/" class="hover:text-accent">Início</a></li>
@@ -17,7 +17,7 @@
           href="/reservas"
           class="bg-accent text-dark px-5 py-2 rounded-md font-semibold hover:bg-yellow-300 transition"
         >
-          Reservar
+          Login
         </a>
       </nav>
     </header>
