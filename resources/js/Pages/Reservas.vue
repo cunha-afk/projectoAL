@@ -94,7 +94,29 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import axiosInstance from '../axios'; // Importa a configuração do Axios
 
+export default {
+    name: 'Home',
+    data() {
+        return {
+            message: ''
+        };
+    },
+    mounted() {
+        this.fetchData();
+    },
+    methods: {
+        async fetchData() {
+            try {
+                const response = await axiosInstance.get('/home'); // Chama a API usando Axios
+                this.message = response.data.message;
+            } catch (error) {
+                console.error('Erro ao obter dados:', error);
+            }
+        }
+    }
+};
 const checkin = ref('')
 const checkout = ref('')
 const hospedes = ref(1)

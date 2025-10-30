@@ -1,6 +1,29 @@
 <script setup>
 import { Head } from '@inertiajs/vue3';
 import AuthenticationCardLogo from '@/Components/AuthenticationCardLogo.vue';
+import axiosInstance from '../axios'; // Importa a configuração do Axios
+
+export default {
+    name: 'Home',
+    data() {
+        return {
+            message: ''
+        };
+    },
+    mounted() {
+        this.fetchData();
+    },
+    methods: {
+        async fetchData() {
+            try {
+                const response = await axiosInstance.get('/home'); // Chama a API usando Axios
+                this.message = response.data.message;
+            } catch (error) {
+                console.error('Erro ao obter dados:', error);
+            }
+        }
+    }
+};
 
 defineProps({
     policy: String,
