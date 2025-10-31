@@ -31,3 +31,17 @@ Route::middleware([
         return Inertia::render('Dashboard');
     })->name('dashboard');
 });
+
+ Route::middleware([
+    'auth:sanctum',
+    config('jetstream.auth_session'),
+    'verified',
+    'is_admin',
+])->prefix('admin')->group(function () {
+    Route::get('/', fn() => Inertia::render('Admin/Dashboard'))->name('admin.dashboard');
+    Route::get('/reservas', fn() => Inertia::render('Admin/ReservasAdmin'))->name('admin.reservas');
+    Route::get('/utilizadores', fn() => Inertia::render('Admin/UtilizadoresAdmin'))->name('admin.utilizadores');
+    Route::get('/alojamento', fn() => Inertia::render('Admin/AlojamentoAdmin'))->name('admin.alojamento');
+    Route::get('/comentarios', fn() => Inertia::render('Admin/ComentariosAdmin'))->name('admin.comentarios');
+});
+
