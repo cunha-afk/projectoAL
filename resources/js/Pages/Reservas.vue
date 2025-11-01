@@ -36,18 +36,36 @@
         <div class="bg-white p-6 rounded-lg shadow-md flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
           <div class="flex-1">
             <label class="block text-sm font-medium text-dark mb-1">Check-in</label>
-            <input type="date" v-model="checkin" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-primary outline-none" />
+            <input
+              type="date"
+              v-model="checkin"
+              class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-primary outline-none"
+            />
           </div>
 
           <div class="flex-1">
             <label class="block text-sm font-medium text-dark mb-1">Check-out</label>
-            <input type="date" v-model="checkout" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-primary outline-none" />
+            <input
+              type="date"
+              v-model="checkout"
+              class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-primary outline-none"
+            />
           </div>
 
           <div class="flex items-center justify-center space-x-2">
-            <button @click="hospedes > 1 ? hospedes-- : hospedes" class="px-3 py-1 bg-secondary rounded-md text-dark font-bold">−</button>
+            <button
+              @click="hospedes > 1 ? hospedes-- : hospedes"
+              class="px-3 py-1 bg-secondary rounded-md text-dark font-bold"
+            >
+              −
+            </button>
             <span class="text-dark font-medium">{{ hospedes }} hóspede{{ hospedes > 1 ? 's' : '' }}</span>
-            <button @click="hospedes++" class="px-3 py-1 bg-secondary rounded-md text-dark font-bold">+</button>
+            <button
+              @click="hospedes++"
+              class="px-3 py-1 bg-secondary rounded-md text-dark font-bold"
+            >
+              +
+            </button>
           </div>
         </div>
       </section>
@@ -93,48 +111,44 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import axiosInstance from '../axios'; // Importa a configuração do Axios
+// Importa o ref e computed do Vue
+import { ref, computed, onMounted } from 'vue';
+import axiosInstance from '../axios';  // Importa a configuração do Axios
 
-export default {
-    name: 'Home',
-    data() {
-        return {
-            message: ''
-        };
-    },
-    mounted() {
-        this.fetchData();
-    },
-    methods: {
-        async fetchData() {
-            try {
-                const response = await axiosInstance.get('/home'); // Chama a API usando Axios
-                this.message = response.data.message;
-            } catch (error) {
-                console.error('Erro ao obter dados:', error);
-            }
-        }
-    }
-};
-const checkin = ref('')
-const checkout = ref('')
-const hospedes = ref(1)
-const precoNoite = 100
+// Variáveis do Vue
+const checkin = ref('');
+const checkout = ref('');
+const hospedes = ref(1);
+const precoNoite = 100;
 
 const noites = computed(() => {
-  if (!checkin.value || !checkout.value) return 0
-  const d1 = new Date(checkin.value)
-  const d2 = new Date(checkout.value)
-  const diff = (d2 - d1) / (1000 * 60 * 60 * 24)
-  return diff > 0 ? diff : 0
-})
+  if (!checkin.value || !checkout.value) return 0;
+  const d1 = new Date(checkin.value);
+  const d2 = new Date(checkout.value);
+  const diff = (d2 - d1) / (1000 * 60 * 60 * 24);
+  return diff > 0 ? diff : 0;
+});
 
-const total = computed(() => noites.value * precoNoite)
+const total = computed(() => noites.value * precoNoite);
 
 const continuar = () => {
-  alert('Reserva guardada temporariamente! A seguir adicionamos o passo de contacto.')
-}
+  alert('Reserva guardada temporariamente! A seguir adicionamos o passo de contacto.');
+};
+
+// Função para buscar os dados da API (exemplo)
+const fetchData = async () => {
+  try {
+    const response = await axiosInstance.get('/home');
+    console.log(response.data);  // Verifique a resposta da API
+  } catch (error) {
+    console.error('Erro ao obter dados:', error);  // Exibe erros se houver falhas na requisição
+  }
+};
+
+// Chama a função fetchData quando o componente for montado
+onMounted(() => {
+  fetchData();
+});
 </script>
 
 <style scoped>

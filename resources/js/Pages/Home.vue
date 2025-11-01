@@ -14,7 +14,7 @@
           <li><a href="/contactos" class="hover:text-accent">Contactos</a></li>
         </ul>
         <a
-          href="/reservas"
+          href="/login"
           class="bg-accent text-dark px-5 py-2 rounded-md font-semibold hover:bg-yellow-300 transition"
         >
           Login
@@ -23,9 +23,7 @@
     </header>
 
     <!-- Hero Section -->
-    <section
-      class="relative h-[80vh] flex items-center justify-center text-center text-white mt-20"
-    >
+    <section class="relative h-[80vh] flex items-center justify-center text-center text-white mt-20">
       <img
         src="/images/hero.jpg"
         alt="Paisagem de alojamento"
@@ -60,7 +58,7 @@
     <!-- Destaques -->
     <section class="bg-secondary text-dark py-20 px-6 md:px-20">
       <h2 class="text-3xl font-bold text-center mb-10">Os Nossos Destaques</h2>
-      <div class="max-w-6xl mx-auto grid md:grid-cols-3 gap-10">
+      <div class="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
         <div
           v-for="(item, index) in alojamentos"
           :key="index"
@@ -86,30 +84,12 @@
 </template>
 
 <script setup>
-import axiosInstance from '../axios'; // Importa a configuração do Axios
+// Importa as funções do Vue
+import { onMounted } from 'vue';
+import axiosInstance from '../axios';  // Importa a configuração do Axios
 
-export default {
-    name: 'Home',
-    data() {
-        return {
-            message: ''
-        };
-    },
-    mounted() {
-        this.fetchData();
-    },
-    methods: {
-        async fetchData() {
-            try {
-                const response = await axiosInstance.get('/home'); // Chama a API usando Axios
-                this.message = response.data.message;
-            } catch (error) {
-                console.error('Erro ao obter dados:', error);
-            }
-        }
-    }
-};
-const alojamentos = [
+// Variáveis e dados diretamente no script setup
+let alojamentos = [
   {
     titulo: "Quarto do Sol",
     descricao: "Vista deslumbrante sobre o vale e piscina privativa.",
@@ -129,9 +109,21 @@ const alojamentos = [
     imagem: "/images/casa3.jpg",
   },
 ];
-function mostrarMensagem() {
-  alert('Funcionalidade de reservas em breve ');
-}
+
+// Função fetchData para fazer a chamada à API
+const fetchData = async () => {
+  try {
+    const response = await axiosInstance.get('/home');
+    message = response.data.message;  // Atualiza a variável
+  } catch (error) {
+    console.error('Erro ao obter dados:', error); // Exibe erros se houver falhas na requisição
+  }
+};
+
+// Usando onMounted para chamar fetchData quando o componente for montado
+onMounted(() => {
+  fetchData();
+});
 </script>
 
 <style scoped>
@@ -151,8 +143,3 @@ function mostrarMensagem() {
   background-color: #e6e019;
 }
 </style>
-
-
-
-
-

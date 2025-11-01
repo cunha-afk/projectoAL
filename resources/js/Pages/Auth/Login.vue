@@ -7,6 +7,7 @@ import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
+import axios from 'axios';
 
 defineProps({
     canResetPassword: Boolean,
@@ -19,12 +20,34 @@ const form = useForm({
     remember: false,
 });
 
+// Função para login
 const submit = () => {
     form.transform(data => ({
         ...data,
         remember: form.remember ? 'on' : '',
     })).post(route('login'), {
         onFinish: () => form.reset('password'),
+        onSuccess: (response) => {
+            // Salva o token no localStorage após login bem-sucedido
+            localStorage.setItem('auth_token', response.token); 
+            console.log('Login bem-sucedido', response);
+        },
+        onError: (error) => {
+            console.error('Erro ao fazer login', error);
+        }
+    });
+};
+
+// Função para logout
+const logout = () => {
+    // Remove o token do localStorage ao fazer logout
+    localStorage.removeItem('auth_token');
+    console.log('Logout bem-sucedido');
+    // Caso esteja utilizando a API para logout, pode ser feito aqui
+    axios.post('/logout').then(() => {
+        console.log('Logout na API bem-sucedido');
+    }).catch((error) => {
+        console.error('Erro ao fazer logout', error);
     });
 };
 </script>
@@ -86,5 +109,15 @@ const submit = () => {
                 </PrimaryButton>
             </div>
         </form>
+
+        <!-- Botão Logout -->
+        <div v-if="localStorage.getItem('auth_token')" class="mt-4">
+            <button 
+                @click="logout"
+                class="bg-red-500 text-white font-semibold px-6 py-3 rounded-lg hover:bg-red-600 transition"
+            >
+                Logout
+            </button>
+        </div>
     </AuthenticationCard>
 </template>
