@@ -44,7 +44,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import { RouterLink } from 'vue-router'
+import { Link } from '@inertiajs/vue3'
 
 const props = defineProps({
   title: {
