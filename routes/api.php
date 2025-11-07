@@ -9,3 +9,13 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 Route::get('/public/meteo', [MeteoController::class, 'index']);
+
+
+Route::get('/alojamentos', [AlojamentoController::class, 'index']);
+Route::get('/alojamentos/{id}', [AlojamentoController::class, 'show']);
+
+Route::post('/alojamentos/{id}/available', [ReservaController::class, 'available']);
+Route::middleware('auth:sanctum')->group(function() {
+    Route::post('/reservas', [ReservaController::class, 'store']);
+    Route::get('/reservas/me', [ReservaController::class, 'myReservations']);
+});

@@ -17,4 +17,10 @@ class Alojamento extends Model
 
     // Definindo os campos que não podem ser preenchidos
     protected $guarded = ['id'];
+
+    public function reservas() { return $this->hasMany(Reserva::class); }
+    public function comentarios() { return $this->hasMany(Comentario::class); }
+    public function fotos() { return $this->hasMany(Foto::class); }
+    public function videos() { return $this->hasMany(Video::class); }
+    public function bloqueios() { return $this->hasMany(Bloqueio::class); }
 }

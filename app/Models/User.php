@@ -67,4 +67,16 @@ class User extends Authenticatable
         ];
     }
 
+     public function reservas() {
+        return $this->hasMany(Reserva::class);
+    }
+
+    public function comentarios() {
+        return $this->hasMany(Comentario::class);
+    }
+
+    public function isAdmin() {
+        return $this->role === 'admin';
+    }
+
 }
