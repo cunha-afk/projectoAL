@@ -36,8 +36,15 @@ return [
     ],
 
     'openweather' => [
-    'key' => env('OPENWEATHER_API_KEY'),
-    'city' => env('OPENWEATHER_CITY', 'Peso da Régua'),
+        'key' => env('OPENWEATHER_API_KEY'),
+        'city' => env('OPENWEATHER_CITY', 'Peso da Régua'),
+    ],
+
+    'easypay' => [
+        'api_key' => env('EASYPAY_API_KEY'),
+        'client_id' => env('EASYPAY_CLIENT_ID'),
+        'sandbox' => env('EASYPAY_SANDBOX', true),
+        'base_url' => env('EASYPAY_BASE_URL', 'https://api.test.easypay.pt/2.0'),
     ],
 
 
