@@ -31,10 +31,16 @@
                   <input type="date" id="dataFim" v-model="reserva.dataFim" class="w-full mt-1 p-2 border rounded" required />
                 </div>
               </div>
-              <button type="submit" class="mt-4 bg-accent text-dark font-semibold px-6 py-3 rounded-lg shadow hover:bg-yellow-300 transition">
-                Reservar Agora
+
+              <!-- Verificação de erro no formato das datas -->
+              <p v-if="erroDatas" class="text-red-500 text-sm mt-2">A data de fim não pode ser anterior à data de início.</p>
+
+              <button type="submit" :disabled="isLoading" class="mt-4 bg-accent text-dark font-semibold px-6 py-3 rounded-lg shadow hover:bg-yellow-300 transition">
+                {{ isLoading ? 'Aguarde...' : 'Reservar Agora' }}
               </button>
             </form>
+            <p v-if="erro" class="text-red-500 mt-4">{{ erro }}</p>
+            <p v-if="mensagem" class="text-green-600 mt-4">{{ mensagem }}</p>
           </div>
         </div>
       </div>
@@ -44,7 +50,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import axiosInstance from '../axios'; // Importa a configuração do Axios
 import { useRoute, useRouter } from 'vue-router'; // Para obter parâmetros de rota
 
@@ -54,6 +60,11 @@ const reserva = ref({
   dataInicio: '',
   dataFim: '',
 });
+
+const isLoading = ref(false);
+const erro = ref('');
+const mensagem = ref('');
+const erroDatas = ref(false);
 
 // Obter o ID do alojamento da URL
 const route = useRoute();
@@ -70,19 +81,37 @@ const fetchAlojamento = async () => {
   }
 };
 
+// Verifica se as datas são válidas
+watch(() => reserva.dataFim, (newDataFim) => {
+  if (newDataFim && reserva.dataInicio && new Date(newDataFim) < new Date(reserva.dataInicio)) {
+    erroDatas.value = true;
+  } else {
+    erroDatas.value = false;
+  }
+});
+
 // Função para fazer a reserva
 const reservar = async () => {
+  if (erroDatas.value) return;
+
+  isLoading.value = true;
+  erro.value = ''; // Resetando erro antes de tentar novamente
+
   try {
     const response = await axiosInstance.post('/reservas', {
       alojamento_id: alojamentoId,
       data_inicio: reserva.value.dataInicio,
       data_fim: reserva.value.dataFim,
     });
-    alert('Reserva feita com sucesso!');
+    mensagem.value = 'Reserva feita com sucesso!';
+    erro.value = '';
     router.push('/reservas'); // Redireciona para a página de reservas
   } catch (error) {
     console.error('Erro ao fazer reserva', error);
-    alert('Erro ao fazer a reserva. Tente novamente.');
+    erro.value = 'Erro ao fazer a reserva. Tente novamente.';
+    mensagem.value = '';
+  } finally {
+    isLoading.value = false;
   }
 };
 

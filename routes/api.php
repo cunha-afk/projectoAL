@@ -11,7 +11,6 @@ use App\Http\Controllers\API\AlojamientoController;
 use App\Http\Controllers\API\ComentarioController;
 use App\Http\Controllers\API\AdminController;
 
-
 //  Rota para obter o utilizador autenticado
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -23,18 +22,21 @@ Route::get('/public/meteo', [MeteoController::class, 'index']);
 //  Conversão de moedas
 Route::get('/public/conversao', [CurrencyController::class, 'convert']);
 
+Route::apiResource('reservas', ReservaController::class);
+
 //  Alojamentos (públicos)
 Route::get('/alojamentos', [AlojamentoController::class, 'index']);
 Route::get('/alojamentos/{id}', [AlojamentoController::class, 'show']);
 
 //  Reservas
 Route::get('/reservas', [ReservaController::class, 'index']);
+
 Route::post('/alojamentos/{id}/available', [ReservaController::class, 'available']);
 
 //  Reservas autenticadas
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('auth:sanctum')->group(function() {
     Route::post('/reservas', [ReservaController::class, 'store']);
-    Route::get('/reservas/me', [ReservaController::class, 'myReservations']);
+    //Route::get('/reservas/me', [ReservaController::class, 'myReservations']);
 });
 
 //  Pagamentos
@@ -44,3 +46,10 @@ Route::prefix('pagamentos')->group(function () {
     Route::post('/webhook', [PaymentController::class, 'webhook']);
 });
 
+
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::post('/reservas', [ReservaController::class, 'store']);
+    Route::get('/reservas', [ReservaController::class, 'index']);
+});
+
+Route::get('/public/conversao', [CurrencyController::class, 'convert']);

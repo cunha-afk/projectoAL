@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\Controller;
 use App\Models\Reserva;
 use Illuminate\Http\Request;
 
@@ -52,6 +52,7 @@ class ReservaController extends Controller
         }
 
         // 🔹 Calcular preço (podes depois mover isto para o Model)
+        //$data['user_id'] = auth()->id();
         $data['preco_total'] = Reserva::calcularPreco($data['data_inicio'], $data['data_fim']);
         $data['estado'] = 'pendente';
 
