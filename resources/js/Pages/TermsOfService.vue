@@ -1,32 +1,29 @@
 <script setup>
-import { Head } from '@inertiajs/vue3';
-import AuthenticationCardLogo from '@/Components/AuthenticationCardLogo.vue';
-import axiosInstance from '../axios'; // Importa a configuração do Axios
+import { ref, onMounted } from 'vue'
+import { Head } from '@inertiajs/vue3'
+import AuthenticationCardLogo from '@/Components/AuthenticationCardLogo.vue'
+import axiosInstance from '../axios' // Importa a configuração do Axios
 
-export default {
-    name: 'Home',
-    data() {
-        return {
-            message: ''
-        };
-    },
-    mounted() {
-        this.fetchData();
-    },
-    methods: {
-        async fetchData() {
-            try {
-                const response = await axiosInstance.get('/home'); // Chama a API usando Axios
-                this.message = response.data.message;
-            } catch (error) {
-                console.error('Erro ao obter dados:', error);
-            }
-        }
-    }
-};
+// Propriedades vindas do Inertia
 defineProps({
-    terms: String,
-});
+  terms: String,
+})
+
+// Variável reativa
+const message = ref('')
+
+// Função para obter dados da API
+async function fetchData() {
+  try {
+    const response = await axiosInstance.get('/home')
+    message.value = response.data.message
+  } catch (error) {
+    console.error('Erro ao obter dados:', error)
+  }
+}
+
+// Chama automaticamente quando o componente monta
+onMounted(fetchData)
 </script>
 
 <template>

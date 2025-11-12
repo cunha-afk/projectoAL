@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Http\Controllers\API\Controller;
+use App\Http\Controllers\Controller;
 use App\Models\Comentario;
 use App\Http\Requests\StoreComentarioRequest;
 use Illuminate\Http\Request;

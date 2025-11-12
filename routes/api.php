@@ -7,7 +7,7 @@ use App\Http\Controllers\Api\ReservaController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\CurrencyController;
 use App\Http\Controllers\API\AuthController;
-use App\Http\Controllers\API\AlojamientoController;
+use App\Http\Controllers\API\AlojamentoController;
 use App\Http\Controllers\API\ComentarioController;
 use App\Http\Controllers\API\AdminController;
 use App\Http\Controllers\Admin\ComentariosController;

@@ -1,53 +1,50 @@
 <script setup>
-import { Head, Link } from '@inertiajs/vue3';
-import axiosInstance from '../axios'; // Importa a configuração do Axios
+import { ref, onMounted } from 'vue'
+import { Head, Link } from '@inertiajs/vue3'
+import axiosInstance from '../axios' // Importa a configuração do Axios
 
-export default {
-    name: 'Home',
-    data() {
-        return {
-            message: ''
-        };
-    },
-    mounted() {
-        this.fetchData();
-    },
-    methods: {
-        async fetchData() {
-            try {
-                const response = await axiosInstance.get('/home'); // Chama a API usando Axios
-                this.message = response.data.message;
-            } catch (error) {
-                console.error('Erro ao obter dados:', error);
-            }
-        }
-    }
-};
+//  Define as props (como tinhas)
 defineProps({
-    canLogin: {
-        type: Boolean,
-    },
-    canRegister: {
-        type: Boolean,
-    },
-    laravelVersion: {
-        type: String,
-        required: true,
-    },
-    phpVersion: {
-        type: String,
-        required: true,
-    },
-});
+  canLogin: {
+    type: Boolean,
+  },
+  canRegister: {
+    type: Boolean,
+  },
+  laravelVersion: {
+    type: String,
+    required: true,
+  },
+  phpVersion: {
+    type: String,
+    required: true,
+  },
+})
 
+// Estado reativo
+const message = ref('')
+
+//  Função que busca dados da API
+async function fetchData() {
+  try {
+    const response = await axiosInstance.get('/home')
+    message.value = response.data.message
+  } catch (error) {
+    console.error('Erro ao obter dados:', error)
+  }
+}
+
+//  Lifecycle: executa ao montar o componente
+onMounted(fetchData)
+
+//  Função para lidar com erro de imagem
 function handleImageError() {
-    document.getElementById('screenshot-container')?.classList.add('!hidden');
-    document.getElementById('docs-card')?.classList.add('!row-span-1');
-    document.getElementById('docs-card-content')?.classList.add('!flex-row');
-    document.getElementById('background')?.classList.add('!hidden');
+  document.getElementById('screenshot-container')?.classList.add('!hidden')
+  document.getElementById('docs-card')?.classList.add('!row-span-1')
+  document.getElementById('docs-card-content')?.classList.add('!flex-row')
+  document.getElementById('background')?.classList.add('!hidden')
 }
 </script>
-
 <template>
     <Head title="Welcome" />
     <div class="bg-gray-50 text-black/50 dark:bg-black dark:text-white/50">
