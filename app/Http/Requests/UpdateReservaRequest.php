@@ -14,20 +14,23 @@ class UpdateReservaRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'inicio' => 'sometimes|date',
-            'fim' => 'sometimes|date|after:inicio',
+            'checkin' => 'sometimes|date',
+            'checkout' => 'sometimes|date|after:checkin',
+            'hospedes' => 'sometimes|integer|min:1',
             'estado' => 'sometimes|in:pendente,confirmada,cancelada',
+            'observacoes' => 'nullable|string'
         ];
     }
 
     public function messages(): array
     {
         return [
-            'inicio.date' => 'O campo início deve ser uma data válida.',
-            'fim.date' => 'O campo fim deve ser uma data válida.',
-            'fim.after' => 'A data de fim deve ser posterior à data de início.',
+            'checkin.date' => 'A data de check-in deve ser válida.',
+            'checkout.date' => 'A data de checkout deve ser válida.',
+            'checkout.after' => 'A data de checkout deve ser posterior ao check-in.',
             'estado.in' => 'O estado deve ser pendente, confirmada ou cancelada.',
         ];
     }
 }
+
 

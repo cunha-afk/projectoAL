@@ -8,16 +8,19 @@ class StoreReservaRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true; // permite que qualquer user use esta request
+        return true;
     }
 
     public function rules(): array
     {
         return [
-            'inicio' => 'required|date',
-            'fim' => 'required|date|after:inicio',
-            'user_id' => 'nullable|exists:users,id',
+            'alojamento_id' => 'required|exists:alojamentos,id',
+            'checkin' => 'required|date|after_or_equal:today',
+            'checkout' => 'required|date|after:checkin',
+            'hospedes' => 'required|integer|min:1',
+            'observacoes' => 'nullable|string'
         ];
     }
 }
+
 
