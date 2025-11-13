@@ -57,3 +57,13 @@ Route::get('/alojamentos', function () {
         'alojamentos' => $alojamentos,
     ]);
 });
+
+Route::get('/alojamentos/{id}', function ($id) {
+    // Buscar alojamento específico
+    $alojamento = Alojamento::findOrFail($id);
+
+    return Inertia::render('AlojamentoDetalhes', [
+        'id' => $id,                  // necessário para o Vue
+        'alojamento' => $alojamento, // envia dados completos também
+    ]);
+});

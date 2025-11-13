@@ -31,7 +31,15 @@
                   <input type="date" id="dataFim" v-model="reserva.dataFim" class="w-full mt-1 p-2 border rounded" required />
                 </div>
               </div>
-
+<template>
+  <div>
+    <div v-for="item in alojamentos" :key="item.id">
+      <Link :href="`/alojamentos/${item.id}`">
+        <h2>{{ item.titulo }}</h2>
+      </Link>
+    </div>
+  </div>
+</template>
               <!-- Verificação de erro no formato das datas -->
               <p v-if="erroDatas" class="text-red-500 text-sm mt-2">A data de fim não pode ser anterior à data de início.</p>
 
@@ -52,7 +60,7 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 import axiosInstance from '../axios'; // Importa a configuração do Axios
-import { useRoute, useRouter } from 'vue-router'; // Para obter parâmetros de rota
+//import { useRoute, useRouter } from 'vue-router'; // Para obter parâmetros de rota
 
 // Armazenar dados do alojamento e do formulário de reserva
 const alojamento = ref({});
@@ -67,9 +75,9 @@ const mensagem = ref('');
 const erroDatas = ref(false);
 
 // Obter o ID do alojamento da URL
-const route = useRoute();
-const router = useRouter();
-const alojamentoId = route.params.id; // O parâmetro 'id' que vem da URL
+//const route = useRoute();
+//const router = useRouter();
+//const alojamentoId = route.params.id; // O parâmetro 'id' que vem da URL
 
 // Função para buscar os dados do alojamento
 const fetchAlojamento = async () => {
