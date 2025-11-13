@@ -12,56 +12,95 @@ use App\Http\Controllers\API\ComentarioController;
 use App\Http\Controllers\API\AdminController;
 use App\Http\Controllers\Admin\ComentariosController;
 
+/*
+|--------------------------------------------------------------------------
+| Rotas Públicas
+|--------------------------------------------------------------------------
+*/
 
-//  Rota para obter o utilizador autenticado
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
-
-//  API pública - Meteo
+// Meteo
 Route::get('/public/meteo', [MeteoController::class, 'index']);
 
-//  Comentários
-Route::apiResource('comentarios', ComentarioController::class);
-
-//  Conversão de moedas
+// Conversão de moedas
 Route::get('/public/conversao', [CurrencyController::class, 'convert']);
 
-Route::apiResource('reservas', ReservaController::class);
-
-//  Alojamentos (públicos)
+// Alojamentos (públicos)
 Route::get('/alojamentos', [AlojamentoController::class, 'index']);
 Route::get('/alojamentos/{id}', [AlojamentoController::class, 'show']);
 
-//  Reservas
-Route::get('/reservas', [ReservaController::class, 'index']);
+// Verificar disponibilidade de alojamento (público)
+Route::post('/reservas/available/{alojamentoId}', [ReservaController::class, 'available']);
 
-Route::post('/alojamentos/{id}/available', [ReservaController::class, 'available']);
+// Comentários (públicos - leitura)
+Route::get('/comentarios', [ComentarioController::class, 'index']);
+Route::get('/comentarios/{id}', [ComentarioController::class, 'show']);
 
-//  Reservas autenticadas
+/*
+|--------------------------------------------------------------------------
+| Rotas Autenticadas
+|--------------------------------------------------------------------------
+*/
+
 Route::middleware('auth:sanctum')->group(function() {
-    Route::post('/reservas', [ReservaController::class, 'store']);
-     Route::get('/reservas', [ReservaController::class, 'index']);
-    //Route::get('/reservas/me', [ReservaController::class, 'myReservations']);
+    
+    // Obter utilizador autenticado
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+
+    // Reservas do utilizador
+    Route::prefix('reservas')->group(function() {
+        Route::get('/me', [ReservaController::class, 'myReservations']);
+        Route::post('/', [ReservaController::class, 'store']);
+        Route::get('/{id}', [ReservaController::class, 'show']);
+        Route::put('/{id}', [ReservaController::class, 'update']);
+        Route::delete('/{id}', [ReservaController::class, 'destroy']);
+        Route::post('/{reserva}/cancel', [ReservaController::class, 'cancel']);
+    });
+
+    // Comentários (criar)
+    Route::post('/comentarios', [ComentarioController::class, 'store']);
+    Route::put('/comentarios/{id}', [ComentarioController::class, 'update']);
+    Route::delete('/comentarios/{id}', [ComentarioController::class, 'destroy']);
+
+    // Pagamentos
+    Route::prefix('pagamentos')->group(function () {
+        Route::post('/checkout/{reservaId}', [PaymentController::class, 'checkout']);
+        Route::get('/status/{paymentKey}', [PaymentController::class, 'status']);
+    });
 });
 
-//  Pagamentos
-Route::prefix('pagamentos')->group(function () {
-    Route::post('/checkout/{reservaId}', [PaymentController::class, 'checkout']);
-    Route::get('/status/{paymentKey}', [PaymentController::class, 'status']);
-    Route::post('/webhook', [PaymentController::class, 'webhook']);
-});
+/*
+|--------------------------------------------------------------------------
+| Webhooks (Sem autenticação)
+|--------------------------------------------------------------------------
+*/
 
+Route::post('/pagamentos/webhook', [PaymentController::class, 'webhook']);
 
-
-
-Route::get('/public/conversao', [CurrencyController::class, 'convert']);
-
+/*
+|--------------------------------------------------------------------------
+| Rotas Admin
+|--------------------------------------------------------------------------
+*/
 
 Route::middleware(['auth:sanctum', 'role:admin'])
     ->prefix('admin')
     ->group(function () {
-        Route::get('/comentarios', [ComentariosController::class, 'index']);
-        Route::delete('/comentarios/{id}', [ComentariosController::class, 'destroy']);
-        Route::patch('/comentarios/{id}/toggle', [ComentariosController::class, 'toggleAprovado']);
+        
+        // Reservas Admin
+        Route::prefix('reservas')->group(function() {
+            Route::get('/', [ReservaController::class, 'indexAdmin']);
+            Route::patch('/{reserva}/status', [ReservaController::class, 'updateStatus']);
+        });
+        
+        // Comentários Admin
+        Route::prefix('comentarios')->group(function() {
+            Route::get('/', [ComentariosController::class, 'index']);
+            Route::delete('/{id}', [ComentariosController::class, 'destroy']);
+            Route::patch('/{id}/toggle', [ComentariosController::class, 'toggleAprovado']);
+        });
+
+        // Alojamentos Admin (se necessário)
+        // Route::apiResource('alojamentos', AlojamentoController::class)->except(['index', 'show']);
     });

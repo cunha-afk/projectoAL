@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Reserva;
+use App\Models\Alojamento;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Str;
 
 class ReservaController extends Controller
 {
@@ -33,73 +35,70 @@ class ReservaController extends Controller
             'observacoes' => 'nullable|string'
         ]);
 
+        // Verificar capacidade do alojamento
+        $alojamento = Alojamento::findOrFail($data['alojamento_id']);
+        if (isset($alojamento->capacidade) && $data['hospedes'] > $alojamento->capacidade) {
+            return response()->json([
+                'error' => 'O número de hóspedes excede a capacidade do alojamento.'
+            ], 422);
+        }
+
+        // Verificar conflito de datas (LÓGICA CORRIGIDA)
+        if ($this->hasDateConflict($data['alojamento_id'], $data['checkin'], $data['checkout'])) {
+            return response()->json([
+                'error' => 'Já existe uma reserva nesse intervalo de datas.'
+            ], 409);
+        }
+
+        // Preparar dados
         $data['user_id'] = auth()->id();
         $data['estado'] = 'pendente';
-        $data['total'] = Reserva::calcularPreco($data['checkin'], $data['checkout'], $data['alojamento_id']);
-
-        // Verificar conflito de datas
-        $overlap = Reserva::where('alojamento_id', $data['alojamento_id'])
-            ->where(function ($query) use ($data) {
-                $query->whereBetween('checkin', [$data['checkin'], $data['checkout']])
-                      ->orWhereBetween('checkout', [$data['checkin'], $data['checkout']])
-                      ->orWhere(function ($q) use ($data) {
-                          $q->where('checkin', '<', $data['checkin'])
-                            ->where('checkout', '>', $data['checkout']);
-                      });
-            })
-            ->where('estado', '!=', 'cancelada')
-            ->exists();
-
-        if ($overlap) {
-            return response()->json(['error' => 'Já existe uma reserva nesse intervalo.'], 409);
-        }
+        $data['referencia'] = $this->gerarReferencia();
+        $data['total'] = $this->calcularPreco(
+            $data['checkin'], 
+            $data['checkout'], 
+            $alojamento
+        );
 
         $reserva = Reserva::create($data);
 
-        return response()->json($reserva, 201);
+        return response()->json($reserva->load(['user', 'alojamento']), 201);
     }
 
     public function update(Request $request, $id)
     {
         $reserva = Reserva::findOrFail($id);
 
+        // Verificar permissão
+        if (auth()->id() !== $reserva->user_id && !auth()->user()->is_admin) {
+            return response()->json(['message' => 'Não autorizado.'], 403);
+        }
+
         $data = $request->validate([
-            'checkin' => 'sometimes|date',
+            'checkin' => 'sometimes|date|after_or_equal:today',
             'checkout' => 'sometimes|date|after:checkin',
             'hospedes' => 'sometimes|integer|min:1',
             'estado' => ['sometimes', Rule::in(['pendente', 'confirmada', 'cancelada'])],
             'observacoes' => 'nullable|string'
         ]);
 
-        // Se as datas forem alteradas, verificar overlap
-        if ($request->has(['checkin', 'checkout'])) {
+        // Se as datas forem alteradas, verificar conflito
+        if (isset($data['checkin']) || isset($data['checkout'])) {
+            $checkin = $data['checkin'] ?? $reserva->checkin;
+            $checkout = $data['checkout'] ?? $reserva->checkout;
 
-            $inicio = $data['checkin'];
-            $fim = $data['checkout'];
-
-            $overlap = Reserva::where('alojamento_id', $reserva->alojamento_id)
-                ->where('id', '!=', $id)
-                ->where(function ($query) use ($inicio, $fim) {
-                    $query->whereBetween('checkin', [$inicio, $fim])
-                          ->orWhereBetween('checkout', [$inicio, $fim])
-                          ->orWhere(function ($q) use ($inicio, $fim) {
-                              $q->where('checkin', '<', $inicio)
-                                ->where('checkout', '>', $fim);
-                          });
-                })
-                ->where('estado', '!=', 'cancelada')
-                ->exists();
-
-            if ($overlap) {
-                return response()->json(['error' => 'Já existe uma reserva nesse intervalo.'], 409);
+            if ($this->hasDateConflict($reserva->alojamento_id, $checkin, $checkout, $id)) {
+                return response()->json([
+                    'error' => 'Já existe uma reserva nesse intervalo de datas.'
+                ], 409);
             }
 
-            $data['total'] = Reserva::calcularPreco($inicio, $fim, $reserva->alojamento_id);
+            $data['total'] = $this->calcularPreco($checkin, $checkout, $reserva->alojamento);
         }
 
         $reserva->update($data);
 
-        return response()->json($reserva);
+        return response()->json($reserva->load(['user', 'alojamento']));
     }
 
     public function cancel(Reserva $reserva)
@@ -109,12 +108,14 @@ class ReservaController extends Controller
         }
 
         if (now()->greaterThanOrEqualTo($reserva->checkin)) {
-            return response()->json(['message' => 'Não é possível cancelar reservas no dia de entrada ou após.'], 400);
+            return response()->json([
+                'message' => 'Não é possível cancelar reservas no dia de entrada ou após.'
+            ], 400);
         }
 
         $reserva->update(['estado' => 'cancelada']);
 
-        return response()->json(['message' => 'Reserva cancelada.']);
+        return response()->json(['message' => 'Reserva cancelada com sucesso.']);
     }
 
     public function destroy($id)
@@ -122,7 +123,7 @@ class ReservaController extends Controller
         $reserva = Reserva::findOrFail($id);
         $reserva->update(['estado' => 'cancelada']);
 
-        return response()->json(['message' => 'Reserva marcada como cancelada.']);
+        return response()->json(['message' => 'Reserva cancelada.']);
     }
 
     public function myReservations(Request $request)
@@ -130,7 +131,7 @@ class ReservaController extends Controller
         return response()->json(
             Reserva::with('alojamento')
                 ->where('user_id', $request->user()->id)
-                ->latest()
+                ->orderBy('checkin', 'desc')
                 ->get()
         );
     }
@@ -165,24 +166,73 @@ class ReservaController extends Controller
             'checkout' => 'required|date|after:checkin',
         ]);
 
-        $overlap = Reserva::where('alojamento_id', $alojamentoId)
-            ->where(function ($query) use ($data) {
-                $query->whereBetween('checkin', [$data['checkin'], $data['checkout']])
-                      ->orWhereBetween('checkout', [$data['checkin'], $data['checkout']])
-                      ->orWhere(function ($q) use ($data) {
-                          $q->where('checkin', '<', $data['checkin'])
-                            ->where('checkout', '>', $data['checkout']);
-                      });
-            })
-            ->where('estado', '!=', 'cancelada')
-            ->exists();
+        $available = !$this->hasDateConflict(
+            $alojamentoId, 
+            $data['checkin'], 
+            $data['checkout']
+        );
 
         return response()->json([
-            'available' => !$overlap,
-            'message' => $overlap
-                ? 'O alojamento não está disponível.'
-                : 'O alojamento está disponível!'
+            'available' => $available,
+            'message' => $available
+                ? 'O alojamento está disponível!'
+                : 'O alojamento não está disponível nesse período.'
         ]);
+    }
+
+    /**
+     * Verifica se existe conflito de datas (LÓGICA CORRIGIDA)
+     */
+    private function hasDateConflict($alojamentoId, $checkin, $checkout, $excludeId = null)
+    {
+        $query = Reserva::where('alojamento_id', $alojamentoId)
+            ->where('estado', '!=', 'cancelada')
+            ->where(function ($q) use ($checkin, $checkout) {
+                // Caso 1: Nova reserva começa durante reserva existente
+                $q->where(function ($query) use ($checkin) {
+                    $query->where('checkin', '<=', $checkin)
+                          ->where('checkout', '>', $checkin);
+                })
+                // Caso 2: Nova reserva termina durante reserva existente
+                ->orWhere(function ($query) use ($checkout) {
+                    $query->where('checkin', '<', $checkout)
+                          ->where('checkout', '>=', $checkout);
+                })
+                // Caso 3: Nova reserva engloba completamente reserva existente
+                ->orWhere(function ($query) use ($checkin, $checkout) {
+                    $query->where('checkin', '>=', $checkin)
+                          ->where('checkout', '<=', $checkout);
+                });
+            });
+
+        if ($excludeId) {
+            $query->where('id', '!=', $excludeId);
+        }
+
+        return $query->exists();
+    }
+
+    /**
+     * Calcula o preço total da reserva
+     */
+    private function calcularPreco($checkin, $checkout, $alojamento)
+    {
+        $dias = (new \DateTime($checkin))->diff(new \DateTime($checkout))->days;
+        $precoPorNoite = $alojamento->preco_noite ?? 100;
+        
+        return $dias * $precoPorNoite;
+    }
+
+    /**
+     * Gera uma referência única para a reserva
+     */
+    private function gerarReferencia()
+    {
+        do {
+            $referencia = 'RES-' . strtoupper(Str::random(8));
+        } while (Reserva::where('referencia', $referencia)->exists());
+
+        return $referencia;
     }
 }
 
