@@ -17,7 +17,7 @@ class UpdateReservaRequest extends FormRequest
             'checkin' => 'sometimes|date',
             'checkout' => 'sometimes|date|after:checkin',
             'hospedes' => 'sometimes|integer|min:1',
-            'estado' => 'sometimes|in:pendente,confirmada,cancelada',
+            'estado' => 'sometimes|in:pendente,confirmado,concluido,cancelado,expirado',
             'observacoes' => 'nullable|string'
         ];
     }
@@ -28,7 +28,7 @@ class UpdateReservaRequest extends FormRequest
             'checkin.date' => 'A data de check-in deve ser válida.',
             'checkout.date' => 'A data de checkout deve ser válida.',
             'checkout.after' => 'A data de checkout deve ser posterior ao check-in.',
-            'estado.in' => 'O estado deve ser pendente, confirmada ou cancelada.',
+            'estado.in' => 'O estado deve ser pendente, confirmado, concluído, cancelado ou expirado.',
         ];
     }
 }

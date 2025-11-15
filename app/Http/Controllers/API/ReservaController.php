@@ -78,7 +78,7 @@ class ReservaController extends Controller
             'checkin' => 'sometimes|date|after_or_equal:today',
             'checkout' => 'sometimes|date|after:checkin',
             'hospedes' => 'sometimes|integer|min:1',
-            'estado' => ['sometimes', Rule::in(['pendente', 'confirmada', 'cancelada'])],
+            'estado' => ['sometimes', Rule::in(['pendente', 'confirmado', 'cancelado'])],
             'observacoes' => 'nullable|string'
         ]);
 
@@ -113,7 +113,7 @@ class ReservaController extends Controller
             ], 400);
         }
 
-        $reserva->update(['estado' => 'cancelada']);
+        $reserva->update(['estado' => 'cancelado']);
 
         return response()->json(['message' => 'Reserva cancelada com sucesso.']);
     }
@@ -121,7 +121,7 @@ class ReservaController extends Controller
     public function destroy($id)
     {
         $reserva = Reserva::findOrFail($id);
-        $reserva->update(['estado' => 'cancelada']);
+        $reserva->update(['estado' => 'cancelado']);
 
         return response()->json(['message' => 'Reserva cancelada.']);
     }
@@ -148,7 +148,7 @@ class ReservaController extends Controller
     public function updateStatus(Request $request, Reserva $reserva)
     {
         $request->validate([
-            'estado' => ['required', Rule::in(['pendente', 'confirmada', 'cancelada'])],
+            'estado' => ['required', Rule::in(['pendente', 'confirmado', 'cancelado', 'concluido', 'expirado'])],
         ]);
 
         $reserva->update(['estado' => $request->estado]);
@@ -186,7 +186,7 @@ class ReservaController extends Controller
     private function hasDateConflict($alojamentoId, $checkin, $checkout, $excludeId = null)
     {
         $query = Reserva::where('alojamento_id', $alojamentoId)
-            ->where('estado', '!=', 'cancelada')
+            ->where('estado', '!=', 'cancelado')
             ->where(function ($q) use ($checkin, $checkout) {
                 // Caso 1: Nova reserva começa durante reserva existente
                 $q->where(function ($query) use ($checkin) {
