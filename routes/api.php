@@ -53,6 +53,9 @@ Route::middleware('auth:sanctum')->group(function() {
         return $request->user();
     });
 
+    // Criar nova reserva
+    Route::post('/reservas', [ReservaController::class, 'store']);
+
     // Reservas do utilizador
     Route::prefix('reservas')->group(function() {
         Route::get('/me', [ReservaController::class, 'myReservations']);
