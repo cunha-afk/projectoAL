@@ -1,17 +1,7 @@
 <template>
   <div>
-    <!-- Barra de navegação -->
-    <nav class="bg-gray-800 text-white p-4">
-      <div class="max-w-7xl mx-auto flex justify-between items-center">
-        <div class="text-xl font-bold">Alojamento Local</div>
-        <div class="space-x-4">
-          <router-link to="/" class="hover:text-gray-400">Home</router-link>
-          <router-link to="/reservas" class="hover:text-gray-400">Reservas</router-link>
-          <router-link to="/alojamentos" class="hover:text-gray-400">Alojamentos</router-link>
-          <router-link to="/contactos" class="hover:text-gray-400">Contactos</router-link>
-        </div>
-      </div>
-    </nav>
+    <!-- Navbar -->
+    <Navbar />
     
     <div class="contact-page">
       <h1 class="text-3xl font-bold mb-4">Contactos</h1>
@@ -43,6 +33,7 @@
 
 <script setup>
 import { ref } from 'vue';
+import Navbar from '@/Components/NavBar.vue';  // Importa o componente Navbar
 
 const form = ref({
   name: '',
