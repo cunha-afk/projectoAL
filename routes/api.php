@@ -67,6 +67,7 @@ Route::middleware('auth:sanctum')->group(function() {
     Route::prefix('pagamentos')->group(function () {
         Route::post('/checkout/{reservaId}', [PaymentController::class, 'checkout']);
         Route::get('/status/{paymentKey}', [PaymentController::class, 'status']);
+        Route::post('/webhook', [PaymentController::class, 'webhook']);
     });
 });
 
