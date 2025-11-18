@@ -1,8 +1,14 @@
+<script setup>
+import AdminLayout from '@/Layouts/AdminLayout.vue'
+</script>
+
 <template>
-  <div>
-    <h1>Gestão de Comentários</h1>
-    <p>Esta é a página de administração dos comentários.</p>
-  </div>
+  <AdminLayout title="Comentários">
+
+    <h1 class="text-2xl font-bold mb-4">Gestão de Comentários</h1>
+    <p class="text-gray-600">Esta é a página de administração dos comentários.</p>
+
+  </AdminLayout>
 </template>
 
 <script>

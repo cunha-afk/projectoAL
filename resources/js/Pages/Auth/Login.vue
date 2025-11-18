@@ -140,15 +140,5 @@ const logout = () => {
                 </PrimaryButton>
             </div>
         </form>
-
-        <!-- Botão de logout (mostra só se o utilizador tiver token local) -->
-        <div v-if="authToken" class="mt-6 flex justify-center">
-            <button
-                @click="logout"
-                class="bg-red-500 text-white font-semibold px-6 py-3 rounded-lg hover:bg-red-600 transition"
-            >
-                Logout
-            </button>
-        </div>
     </AuthenticationCard>
 </template>

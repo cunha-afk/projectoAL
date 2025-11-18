@@ -11,6 +11,7 @@ use App\Http\Controllers\API\AlojamentoController;
 use App\Http\Controllers\API\ComentarioController;
 use App\Http\Controllers\API\AdminController;
 use App\Http\Controllers\Admin\ComentariosController;
+use App\Http\Controllers\Admin\UtilizadoresController;
 
 
 //  Rota para obter o utilizador autenticado
@@ -64,4 +65,5 @@ Route::middleware(['auth:sanctum', 'role:admin'])
         Route::get('/comentarios', [ComentariosController::class, 'index']);
         Route::delete('/comentarios/{id}', [ComentariosController::class, 'destroy']);
         Route::patch('/comentarios/{id}/toggle', [ComentariosController::class, 'toggleAprovado']);
+        Route::apiResource('utilizadores', UtilizadoresController::class);
     });

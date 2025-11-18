@@ -43,9 +43,12 @@ Route::middleware([
 ])->prefix('admin')->group(function () {
     Route::get('/', fn() => Inertia::render('Admin/Dashboard'))->name('admin.dashboard');
     Route::get('/reservas', fn() => Inertia::render('Admin/ReservasAdmin'))->name('admin.reservas');
-    Route::get('/utilizadores', fn() => Inertia::render('Admin/Utilizadores'))->name('admin.utilizadores');
     Route::get('/comentarios', fn() => Inertia::render('Admin/ComentariosAdmin'))->name('admin.comentarios');
-     Route::get('/alojamento', fn() => Inertia::render('Admin/AlojamentoAdmin'))->name('admin.alojamento');
+    Route::get('/alojamento', fn() => Inertia::render('Admin/AlojamentoAdmin'))->name('admin.alojamento');
+    Route::get('/utilizadores', fn() => Inertia::render('Admin/Utilizadores/Index'))->name('admin.utilizadores');
+    Route::get('/utilizadores/criar', fn() => Inertia::render('Admin/Utilizadores/Create'))->name('admin.utilizadores.create');
+    Route::get('/utilizadores/{id}/editar', fn($id) => Inertia::render('Admin/Utilizadores/Edit', ['id' => $id]))->name('admin.utilizadores.edit');
+
 });
 
 
