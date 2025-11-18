@@ -1,49 +1,84 @@
 <template>
-  <div>
-    <!-- Navbar -->
-    <Navbar />
-    
-    <div class="contact-page">
-      <h1 class="text-3xl font-bold mb-4">Contactos</h1>
-      <p class="mb-4">Se tiver alguma dúvida ou precisar de ajuda, não hesite em entrar em contato conosco!</p>
-      
-      <div class="contact-form">
-        <form @submit.prevent="submitForm">
-          <div class="mb-4">
-            <label for="name" class="block text-sm font-medium text-gray-700">Nome</label>
-            <input v-model="form.name" type="text" id="name" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
-          </div>
+  <div class="min-h-screen bg-gray-50 text-dark font-sans flex flex-col">
+    <!-- Header -->
+     <navbar />
+    <header class="flex justify-between items-center p-6 bg-white shadow-sm">
+      <div class="flex items-center space-x-2">
+        <img src="/images/logo.jpg" alt="Logo" class="h-8" />
+        <h1 class="text-lg font-semibold text-dark">Alojamento Local</h1>
+      </div>
+    </header>
 
-          <div class="mb-4">
-            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-            <input v-model="form.email" type="email" id="email" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
-          </div>
+    <!-- Contact Section -->
+    <div class="contact-page py-8">
+      <h1 class="text-3xl font-bold mb-4 text-center">sContact Us</h1>
+      <p class="mb-4 text-center">Se tiver alguma dúvida ou precisar de ajuda, não hesite em entrar em contato conosco!</p>
 
-          <div class="mb-4">
-            <label for="message" class="block text-sm font-medium text-gray-700">Mensagem</label>
-            <textarea v-model="form.message" id="message" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required></textarea>
-          </div>
+      <!-- Contact Info (Email and Phone) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 text-center mb-8">
+        <div class="bg-white p-6 rounded-lg shadow-md">
+          <img src="/images/icon-email.png" alt="Email" class="h-10 mx-auto mb-4"/>
+          <h3 class="text-xl font-semibold mb-2">Email</h3>
+          <p class="text-gray-600">contato@aloja.local</p>
+        </div>
 
-          <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Enviar</button>
-        </form>
+        <div class="bg-white p-6 rounded-lg shadow-md">
+          <img src="/images/icon-phone.png" alt="Phone" class="h-10 mx-auto mb-4"/>
+          <h3 class="text-xl font-semibold mb-2">Telefone</h3>
+          <p class="text-gray-600">(11) 98765-4321</p>
+        </div>
+      </div>
+
+      <!-- Localização (Google Maps Embed) -->
+      <div class="flex justify-center mb-8">
+        <div class="w-full md:w-1/2">
+          <h3 class="text-xl font-semibold mb-4 text-center">Localização</h3>
+          <iframe 
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3002.676697415246!2d-7.716855171163932!3d41.185218297444564!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd3b4d52ed736209%3A0xb627b1bfb26c6889!2sAlojamento%20Local%20Mar%C3%A3o%20%C3%A0%20Vista!5e0!3m2!1spt-PT!2spt!4v1763466055241!5m2!1spt-PT!2spt" 
+            width="100%" 
+            height="450" 
+            style="border:0;" 
+            allowfullscreen="" 
+            loading="lazy" 
+            referrerpolicy="no-referrer-when-downgrade">
+          </iframe>
+        </div>
+      </div>
+
+      <!-- FAQ Section -->
+      <div class="faq-section py-8">
+        <h2 class="text-3xl font-bold mb-4 text-center">FAQ</h2>
+        <div v-for="(item, index) in faq" :key="index" class="faq-item mb-4">
+          <div class="flex justify-between items-center cursor-pointer" @click="toggleFAQ(index)">
+            <span class="text-lg font-medium">{{ item.question }}</span>
+            <span class="text-lg font-semibold text-accent">{{ openFAQ[index] ? "−" : "+" }}</span>
+          </div>
+          <div v-if="openFAQ[index]" class="mt-2 text-gray-600">
+            <p>{{ item.answer }}</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import Navbar from '../Components/NavBar.vue';  // Importa o componente Navbar
+// Importa o ref e computed do Vue
+import { ref } from "vue";
+import Navbar from "../Components/NavBar.vue";  // Não alterado: Importa a navbar
 
-const form = ref({
-  name: '',
-  email: '',
-  message: ''
-});
+// FAQ
+const faq = [
+  { question: "Whaling can cause oceanic pollution?", answer: "Yes, it's one of the major issues..." },
+  { question: "Whaling can kill marine species?", answer: "Whaling contributes to the decline of marine species..." },
+  { question: "Whaling can hurt tourism?", answer: "Yes, areas known for whale watching can suffer..." },
+  { question: "Whaling is harmful to the ecosystem?", answer: "Indeed, the entire marine ecosystem can be disrupted..." },
+];
 
-const submitForm = () => {
-  // Aqui você pode fazer a lógica para enviar o formulário, por exemplo, via axios para um backend Laravel
-  console.log(form.value);
+const openFAQ = ref(Array(faq.length).fill(false)); // Controlar os FAQ's abertos
+
+const toggleFAQ = (index) => {
+  openFAQ.value[index] = !openFAQ.value[index];
 };
 </script>
 
@@ -52,8 +87,25 @@ const submitForm = () => {
   padding: 2rem;
 }
 
-.contact-form form {
-  max-width: 600px;
-  margin: 0 auto;
+.faq-item {
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 1rem;
+  cursor: pointer;
+}
+
+.faq-item:hover {
+  background-color: #f1f1f1;
+}
+
+.faq-item .text-accent {
+  color: #e6e019;
+}
+
+.bg-primary {
+  background-color: #9faea0;
+}
+
+.bg-secondary {
+  background-color: #b9bda5;
 }
 </style>
