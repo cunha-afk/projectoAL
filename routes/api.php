@@ -13,6 +13,13 @@ use App\Http\Controllers\API\AdminController;
 use App\Http\Controllers\Admin\ComentariosController;
 use App\Http\Controllers\Admin\UtilizadoresController;
 
+
+//  Rota para obter o utilizador autenticado
+Route::get('/user', function (Request $request) {
+    return $request->user();
+})->middleware('auth:sanctum');
+
+//  API pública - Meteo
 Route::get('/public/meteo', [MeteoController::class, 'index']);
 
 // Conversão de moedas
@@ -82,21 +89,31 @@ Route::post('/pagamentos/webhook', [PaymentController::class, 'webhook']);
 Route::middleware(['auth:sanctum', 'role:admin'])
     ->prefix('admin')
     ->group(function () {
-        
+
         // Reservas Admin
         Route::prefix('reservas')->group(function() {
             Route::get('/', [ReservaController::class, 'indexAdmin']);
             Route::patch('/{reserva}/status', [ReservaController::class, 'updateStatus']);
         });
-        
+
         // Comentários Admin
         Route::prefix('comentarios')->group(function() {
             Route::get('/', [ComentariosController::class, 'index']);
             Route::delete('/{id}', [ComentariosController::class, 'destroy']);
             Route::patch('/{id}/toggle', [ComentariosController::class, 'toggleAprovado']);
-        Route::apiResource('utilizadores', UtilizadoresController::class);
         });
+
+        
+       // Route::apiResource('utilizadores', UtilizadoresController::class)->except(['create', 'edit']);
+        // Isto cria:
+        // GET    /api/admin/utilizadores
+        // POST   /api/admin/utilizadores
+        // GET    /api/admin/utilizadores/{user}
+        // PUT    /api/admin/utilizadores/{user}
+        // PATCH  /api/admin/utilizadores/{user}
+        // DELETE /api/admin/utilizadores/{user}
+    });
 
         // Alojamentos Admin (se necessário)
         // Route::apiResource('alojamentos', AlojamentoController::class)->except(['index', 'show']);
-    });
+    

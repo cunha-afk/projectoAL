@@ -4,6 +4,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Models\Alojamento;
+use App\Http\Controllers\Admin\UtilizadoresController;
 
 /* Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -47,12 +48,20 @@ Route::middleware([
     Route::get('/reservas', fn() => Inertia::render('Admin/ReservasAdmin'))->name('admin.reservas');
     Route::get('/comentarios', fn() => Inertia::render('Admin/ComentariosAdmin'))->name('admin.comentarios');
     Route::get('/alojamento', fn() => Inertia::render('Admin/AlojamentoAdmin'))->name('admin.alojamento');
-    Route::get('/utilizadores', fn() => Inertia::render('Admin/Utilizadores/Index'))->name('admin.utilizadores');
-    Route::get('/utilizadores/criar', fn() => Inertia::render('Admin/Utilizadores/Create'))->name('admin.utilizadores.create');
-    Route::get('/utilizadores/{id}/editar', fn($id) => Inertia::render('Admin/Utilizadores/Edit', ['id' => $id]))->name('admin.utilizadores.edit');
 
+    // Página Inertia
+    Route::get('/utilizadores', fn() => Inertia::render('Admin/Utilizadores/Index'))
+        ->name('admin.utilizadores');
+    Route::get('/utilizadores/criar', fn() => Inertia::render('Admin/Utilizadores/Create'))
+        ->name('admin.utilizadores.create');
+    Route::get('/utilizadores/{id}/editar', fn($id) => Inertia::render('Admin/Utilizadores/Edit', ['id' => $id]))
+        ->name('admin.utilizadores.edit');
+    Route::get('/utilizadores-lista', [UtilizadoresController::class, 'index']);
+    Route::post('/utilizadores', [UtilizadoresController::class, 'store']);
+    Route::get('/utilizadores/{user}', [UtilizadoresController::class, 'show']);
+    Route::match(['put', 'patch'], '/utilizadores/{user}', [UtilizadoresController::class, 'update']);
+    Route::delete('/utilizadores/{user}', [UtilizadoresController::class, 'destroy']);
 });
-
 
 
 Route::get('/alojamentos', function () {

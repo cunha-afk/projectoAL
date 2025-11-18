@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { Link } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
-import axios from '@/axios'
+import axios from '@/axiosBackend'
 
 const users = ref([])
 const pagination = ref({})
@@ -11,21 +11,32 @@ const loading = ref(true)
 const fetchUsers = async (page = 1) => {
   loading.value = true
 
-  const res = await axios.get(`/admin/utilizadores?page=${page}`)
-  users.value = res.data.data
-  pagination.value = res.data
+  try {
+    const res = await axios.get('/admin/utilizadores-lista', {
+      params: { page },
+    })
 
-  loading.value = false
+    users.value = res.data.data      // por causa do paginate()
+    pagination.value = res.data
+  } catch (error) {
+    console.error('Erro ao carregar utilizadores:', error)
+  } finally {
+    loading.value = false
+  }
 }
 
 const deleteUser = async (id) => {
-  if (!confirm("Eliminar utilizador?")) return
+  if (!confirm('Eliminar utilizador?')) return
 
-  await axios.delete(`/admin/utilizadores/${id}`)
-  fetchUsers()
+  try {
+    await axios.delete(`/admin/utilizadores/${id}`)
+    await fetchUsers(pagination.value.current_page || 1)
+  } catch (error) {
+    console.error('Erro ao eliminar utilizador:', error)
+  }
 }
 
-onMounted(fetchUsers)
+onMounted(() => fetchUsers())
 </script>
 
 <template>
@@ -42,43 +53,51 @@ onMounted(fetchUsers)
 
     <div v-if="loading">A carregar...</div>
 
-    <table v-else class="min-w-full bg-white rounded shadow">
-      <thead>
-        <tr class="bg-gray-200 text-left">
-          <th class="p-3">ID</th>
-          <th class="p-3">Nome</th>
-          <th class="p-3">Email</th>
-          <th class="p-3">Criado em</th>
-          <th class="p-3">Ações</th>
-        </tr>
-      </thead>
+   <table v-else class="min-w-full bg-white rounded shadow">
+  <thead>
+    <tr class="bg-gray-200 text-left">
+      <th class="p-3">ID</th>
+      <th class="p-3">Nome</th>
+      <th class="p-3">Email</th>
+      <th class="p-3">Criado em</th>
+      <th class="p-3 text-center">Papéis</th>
+      <th class="p-3 text-center w-100">Ações</th> <!-- largura fixa opcional -->
+    </tr>
+  </thead>
 
-      <tbody>
-        <tr v-for="u in users" :key="u.id" class="border-b">
-          <td class="p-3">{{ u.id }}</td>
-          <td class="p-3">{{ u.name }}</td>
-          <td class="p-3">{{ u.email }}</td>
-          <td class="p-3">{{ new Date(u.created_at).toLocaleDateString() }}</td>
+  <tbody>
+    <tr v-for="u in users" :key="u.id" class="border-b">
+      <td class="p-3">{{ u.id }}</td>
+      <td class="p-3">{{ u.name }}</td>
+      <td class="p-3">{{ u.email }}</td>
+      <td class="p-3">{{ new Date(u.created_at).toLocaleDateString() }}</td>
 
-          <td class="p-3 space-x-2">
-            <Link
-              :href="route('admin.utilizadores.edit', u.id)"
-              class="bg-yellow-500 text-white px-3 py-1 rounded"
-            >
-              Editar
-            </Link>
+      <!-- Papéis centrado -->
+      <td class="p-3 text-center">
+        {{ u.role }}
+      </td>
 
-            <button
-              class="bg-red-600 text-white px-3 py-1 rounded"
-              @click="deleteUser(u.id)"
-            >
-              Eliminar
-            </button>
-          </td>
+      <!-- Ações centradas e com espaçamento consistente -->
+      <td class="p-3">
+        <div class="flex justify-center gap-2">
+          <Link
+            :href="route('admin.utilizadores.edit', u.id)"
+            class="bg-yellow-500 text-white px-3 py-1 rounded"
+          >
+            Editar
+          </Link>
 
-        </tr>
-      </tbody>
-    </table>
+          <button
+            class="bg-red-600 text-white px-3 py-1 rounded"
+            @click="deleteUser(u.id)"
+          >
+            Eliminar
+          </button>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
   </AdminLayout>
 </template>

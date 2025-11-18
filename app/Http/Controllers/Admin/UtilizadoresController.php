@@ -25,6 +25,7 @@ class UtilizadoresController extends Controller
             'name'     => 'required|string|max:255',
             'email'    => 'required|email|unique:users,email',
             'password' => 'required|min:6',
+            'role'     => 'required|in:admin,cliente',
         ]);
 
         $data['password'] = bcrypt($data['password']);
@@ -51,6 +52,7 @@ class UtilizadoresController extends Controller
             'name'     => 'sometimes|string|max:255',
             'email'    => "sometimes|email|unique:users,email,{$user->id}",
             'password' => 'sometimes|min:6',
+            'role'     => 'required|in:admin,cliente',
         ]);
 
         if (isset($data['password'])) {
