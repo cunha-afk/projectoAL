@@ -1,5 +1,8 @@
 <template>
   <div class="min-h-screen bg-white">
+    <!-- Navbar -->
+    <Navbar />
+
     <!-- Header -->
     <header class="bg-primary text-white py-4">
       <div class="max-w-7xl mx-auto px-6">
@@ -16,7 +19,7 @@
         <div class="space-y-4">
           <p class="text-lg">{{ alojamento.descricao }}</p>
           <p class="text-xl font-semibold text-accent">{{ alojamento.preco }}€/noite</p>
-          
+
           <!-- Formulário de Reserva -->
           <div class="mt-8">
             <h2 class="text-2xl font-semibold">Fazer Reserva</h2>
@@ -45,24 +48,14 @@
         </div>
       </div>
     </section>
-
   </div>
 </template>
 
-<!-- <template>
-  <div>
-    <div v-for="item in alojamentos" :key="item.id">
-      <Link :href="`/alojamentos/${item.id}`">
-        <h2>{{ item.titulo }}</h2>
-      </Link>
-    </div>
-  </div>
-</template> -->
 
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 import axiosInstance from '../axios'; // Importa a configuração do Axios
-//import { useRoute, useRouter } from 'vue-router'; // Para obter parâmetros de rota
+import Navbar from '../Components/NavBar.vue'; // Corrigido: Importando a Navbar corretamente com o @
 
 // Armazenar dados do alojamento e do formulário de reserva
 const alojamento = ref({});
@@ -77,9 +70,7 @@ const mensagem = ref('');
 const erroDatas = ref(false);
 
 // Obter o ID do alojamento da URL
-//const route = useRoute();
-//const router = useRouter();
-//const alojamentoId = route.params.id; // O parâmetro 'id' que vem da URL
+const alojamentoId = 1;  // Exemplo, pode ser dinâmico com o useRoute()
 
 // Função para buscar os dados do alojamento
 const fetchAlojamento = async () => {

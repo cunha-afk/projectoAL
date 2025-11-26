@@ -6,10 +6,10 @@
         <span class="text-xl font-bold text-dark">Marão à Vista</span>
       </div>
       <ul class="hidden md:flex space-x-8 text-dark font-medium">
-        <li><inertia-link to="/" class="hover:text-accent">Início</inertia-link></li>
-        <li><inertia-link to="/alojamentos" class="hover:text-accent">Alojamentos</inertia-link></li>
-        <li><inertia-link to="/reservas" class="hover:text-accent">Reservas</inertia-link></li>
-        <li><inertia-link to="/contactos" class="hover:text-accent">Contactos</inertia-link></li>
+        <li><inertia-link to="/" class="hover:text-accent" href="/">Início</inertia-link></li>
+        <li><inertia-link to="/alojamentos" class="hover:text-accent" href="/alojamentos">Alojamentos</inertia-link></li>
+        <li><inertia-link to="/reservas" class="hover:text-accent" href="/reservas">Reservas</inertia-link></li>
+        <li><inertia-link to="/contactos" class="hover:text-accent" href="/contactos">Contactos</inertia-link></li>
       </ul>
       <a
         href="/login"
