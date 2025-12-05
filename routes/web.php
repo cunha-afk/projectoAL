@@ -6,6 +6,7 @@ use Inertia\Inertia;
 use App\Models\Alojamento;
 use App\Http\Controllers\Admin\UtilizadoresController;
 use App\Http\Controllers\Admin\AlojamentoController;
+use App\Http\Controllers\Admin\ComentarioController;
 
 
 /* Route::get('/', function () {
@@ -51,7 +52,6 @@ Route::middleware([
 ->name('admin.')
 ->group(function () {
 
-<<<<<<< HEAD
         //admin  (DASHBOARD)
         Route::get('/', fn () => Inertia::render('Admin/Dashboard'))
             ->name('dashboard');
@@ -61,19 +61,6 @@ Route::middleware([
             ->name('alojamento');
         Route::get('/comentarios', fn () => Inertia::render('Admin/ComentariosAdmin'))
             ->name('comentarios');
-=======
-    // ================================
-    //   PÁGINAS INERTIA (VIEW)
-    // ================================
-    Route::get('/', fn () => Inertia::render('Admin/Dashboard'))
-        ->name('dashboard');
-
-    Route::get('/reservas', fn () => Inertia::render('Admin/RservasAdmin'))
-        ->name('reservas');
-
-    Route::get('/comentarios', fn () => Inertia::render('Admin/Comentarios'))
-        ->name('comentarios');
->>>>>>> 043ee851010bebaaa4091b4fd3e6b25a442f55d7
 
 
 
@@ -125,6 +112,12 @@ Route::middleware([
         Route::delete('/alojamentos/{alojamento}', [AlojamentoController::class, 'destroy']);
         Route::post('/alojamentos/{alojamento}/fotos', [AlojamentoController::class, 'uploadFotos']);
         Route::delete('/alojamentos/fotos/{foto}', [AlojamentoController::class, 'deleteFoto']);
+
+        // ---------- API COMENTÁRIOS ----------
+        Route::get('/comentarios', [ComentarioController::class, 'index']);
+        Route::post('/comentarios/{comentario}/aprovar', [ComentarioController::class, 'aprovar']);
+        Route::delete('/comentarios/{comentario}', [ComentarioController::class, 'destroy']);
+        Route::post('/comentarios/{comentario}/responder', [ComentarioController::class, 'responder']);
     
            });
 });
