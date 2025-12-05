@@ -6,6 +6,7 @@ use Inertia\Inertia;
 use App\Models\Alojamento;
 use App\Http\Controllers\Admin\UtilizadoresController;
 use App\Http\Controllers\Admin\AlojamentoController;
+use App\Http\Controllers\Admin\ComentarioController;
 
 
 /* Route::get('/', function () {
@@ -118,6 +119,12 @@ Route::middleware([
         Route::delete('/alojamentos/{alojamento}', [AlojamentoController::class, 'destroy']);
         Route::post('/alojamentos/{alojamento}/fotos', [AlojamentoController::class, 'uploadFotos']);
         Route::delete('/alojamentos/fotos/{foto}', [AlojamentoController::class, 'deleteFoto']);
+
+        // ---------- API COMENTÁRIOS ----------
+        Route::get('/comentarios', [ComentarioController::class, 'index']);
+        Route::post('/comentarios/{comentario}/aprovar', [ComentarioController::class, 'aprovar']);
+        Route::delete('/comentarios/{comentario}', [ComentarioController::class, 'destroy']);
+        Route::post('/comentarios/{comentario}/responder', [ComentarioController::class, 'responder']);
     
            });
 });
