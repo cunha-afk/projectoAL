@@ -1,26 +1,6 @@
 <template>
   <div class="min-h-screen flex flex-col font-sans text-dark">
-    <!-- Navbar -->
-    <header class="bg-white shadow-md fixed top-0 left-0 w-full z-50">
-      <nav class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-        <div class="flex items-center space-x-3">
-          <img src="/images/logo.jpg" alt="Logo" class="h-10 w-auto" />
-          <span class="text-xl font-bold text-dark">Marão à Vista</span>
-        </div>
-        <ul class="hidden md:flex space-x-8 text-dark font-medium">
-          <li><a href="/" class="hover:text-accent">Início</a></li>
-          <li><a href="/alojamentos" class="hover:text-accent">Alojamentos</a></li>
-          <li><a href="/reservas" class="hover:text-accent">Reservas</a></li>
-          <li><a href="/contactos" class="hover:text-accent">Contactos</a></li>
-        </ul>
-        <a
-          href="/login"
-          class="bg-accent text-dark px-5 py-2 rounded-md font-semibold hover:bg-yellow-300 transition"
-        >
-          Login
-        </a>
-      </nav>
-    </header>
+    <Navbar />
 
     <!-- Hero Section -->
     <section class="relative h-[80vh] flex items-center justify-center text-center text-white mt-20">
@@ -86,7 +66,8 @@
 <script setup>
 // Importa as funções do Vue
 import { onMounted } from 'vue';
-import axiosInstance from '../axios';  // Importa a configuração do Axios
+import axiosInstance from '../axios';  // Importa a configuração do Axiosç
+import Navbar from '../Components/NavBar.vue'; 
 
 // Variáveis e dados diretamente no script setup
 let alojamentos = [

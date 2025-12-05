@@ -2,6 +2,8 @@
 
 namespace App\Actions\Fortify;
 
+
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 
 trait PasswordValidationRules
@@ -13,6 +15,10 @@ trait PasswordValidationRules
      */
     protected function passwordRules(): array
     {
-        return ['required', 'string', Password::default(), 'confirmed'];
+        return [            'required',
+            'string',
+            'confirmed',
+            'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.#^])[A-Za-z\d@$!%*?&.#^]{8,}$/'
+        ];
     }
 }

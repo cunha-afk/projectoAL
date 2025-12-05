@@ -1,114 +1,104 @@
-<template>
-  <div>
-    <h1>Perfil do Usuário</h1>
-    
-    <!-- Informações do Usuário -->
-    <div>
-      <h2>Informações Pessoais</h2>
-      <p><strong>Nome:</strong> {{ user.name }}</p>
-      <p><strong>Email:</strong> {{ user.email }}</p>
-      
-      <!-- Formulário para edição de dados -->
-      <h3>Editar Perfil</h3>
-      <form @submit.prevent="updateProfile">
-        <input v-model="user.name" type="text" placeholder="Nome" required />
-        <input v-model="user.email" type="email" placeholder="Email" required />
-        <button type="submit">Salvar Alterações</button>
-      </form>
-    </div>
+<script setup>
+import { useForm, usePage } from "@inertiajs/vue3";
+import { ref } from "vue";
+import Navbar from '../Components/NavBar.vue'; 
 
-    <!-- Reservas do Usuário -->
-    <div>
-      <h2>Minhas Reservas</h2>
-      <ul>
-        <li v-for="reserva in reservas" :key="reserva.id">
-          <p>Alojamento: {{ reserva.alojamento_nome }}</p>
-          <p>Data Início: {{ reserva.start_date }}</p>
-          <p>Data Fim: {{ reserva.end_date }}</p>
-          <p>Status: {{ reserva.status }}</p>
-        </li>
-      </ul>
-    </div>
-  </div>
-</template>
+const page = usePage();
+const user = page.props.auth.user;
 
-<script>
-import axios from '../axios';
+// Formulário de edição
+const form = useForm({
+    name: user.name,
+    email: user.email,
+    nif: user.nif ?? "",
+    profile_photo: null,
+});
 
-export default {
-  data() {
-    return {
-      user: {
-        name: '',
-        email: '',
-      },
-      reservas: [],
-    };
-  },
-  mounted() {
-    this.fetchUserProfile();
-    this.fetchUserReservations();
-  },
-  methods: {
-    // Função para buscar os dados do usuário
-    async fetchUserProfile() {
-      try {
-        const response = await axios.get('/user'); // Assumindo que existe uma rota que retorna os dados do usuário autenticado
-        this.user = response.data;
-      } catch (error) {
-        console.error('Erro ao carregar perfil', error);
-      }
-    },
-    
-    // Função para atualizar os dados do usuário
-    async updateProfile() {
-      try {
-        await axios.put('/user', {
-          name: this.user.name,
-          email: this.user.email,
-        });
-        alert('Perfil atualizado com sucesso!');
-      } catch (error) {
-        console.error('Erro ao atualizar perfil', error);
-      }
-    },
+// Upload pre-visualização
+const preview = ref(user.profile_photo_url ?? "/images/default-avatar.png");
 
-    // Função para buscar as reservas do usuário
-    async fetchUserReservations() {
-      try {
-        const response = await axios.get('/reservas');
-        this.reservas = response.data;
-      } catch (error) {
-        console.error('Erro ao carregar reservas', error);
-      }
-    },
-  },
+const handleImage = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    form.profile_photo = file;
+    preview.value = URL.createObjectURL(file);
+};
+
+const submit = () => {
+    form.post("/perfil/update", {
+        preserveScroll: true,
+    });
 };
 </script>
 
+<template>
+  <div class="pt-24 max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
+    <Navbar />
+
+    <!-- FOTO PERFIL -->
+    <div class="bg-white shadow-md rounded-lg p-6 flex flex-col items-center">
+      <img
+        :src="preview"
+        class="w-40 h-40 object-cover rounded-full border shadow"
+      />
+
+      <label class="mt-4 cursor-pointer bg-primary text-white px-4 py-2 rounded-md">
+        Alterar imagem
+        <input type="file" class="hidden" @change="handleImage" accept="image/*" />
+      </label>
+
+      <h2 class="mt-4 text-2xl font-semibold text-dark">{{ form.name }}</h2>
+    </div>
+
+    <!-- FORMULÁRIO -->
+    <div class="md:col-span-2 bg-white shadow-md rounded-lg p-6">
+      <h2 class="text-2xl font-bold text-dark mb-6">Informações Pessoais</h2>
+
+      <form @submit.prevent="submit" class="space-y-4">
+
+        <!-- Nome -->
+        <div>
+          <label class="block font-medium mb-1">Nome</label>
+          <input type="text" v-model="form.name"
+            class="w-full border rounded-md px-3 py-2" />
+        </div>
+
+        <!-- Email -->
+        <div>
+          <label class="block font-medium mb-1">Email</label>
+          <input type="email" v-model="form.email"
+            class="w-full border rounded-md px-3 py-2" />
+        </div>
+
+        <!-- NIF -->
+        <div>
+          <label class="block font-medium mb-1">NIF</label>
+          <input type="text" v-model="form.nif"
+            class="w-full border rounded-md px-3 py-2" />
+        </div>
+
+        <!-- Botão -->
+        <div class="pt-4">
+          <button
+            type="submit"
+            class="bg-accent text-dark px-6 py-2 rounded-md font-semibold hover:bg-yellow-300"
+          >
+            Guardar Alterações
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+  </div>
+</template>
+
 <style scoped>
-/* Estilos para a página de perfil */
-h1 {
-  font-size: 2rem;
-  margin-bottom: 20px;
-}
-
-form input {
-  margin-bottom: 10px;
-  padding: 8px;
-  width: 100%;
-  max-width: 400px;
-}
-
-button {
+.bg-primary {
   background-color: #9faea0;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  cursor: pointer;
 }
-
-button:hover {
-  background-color: #616160;
+.text-dark {
+  color: #616160;
 }
 </style>

@@ -30,6 +30,13 @@ Route::get('/contactos', function () {
     return Inertia::render('Contactos');  // Aqui estamos renderizando a página de "Contactos"
 });
 
+//// Rota para a página de perfil
+Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])
+    ->get('/perfil', function () {
+        return Inertia::render('Perfil');
+    })
+    ->name('perfil');
+
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
@@ -51,7 +58,6 @@ Route::middleware([
 ->name('admin.')
 ->group(function () {
 
-<<<<<<< HEAD
         //admin  (DASHBOARD)
         Route::get('/', fn () => Inertia::render('Admin/Dashboard'))
             ->name('dashboard');
@@ -61,19 +67,6 @@ Route::middleware([
             ->name('alojamento');
         Route::get('/comentarios', fn () => Inertia::render('Admin/ComentariosAdmin'))
             ->name('comentarios');
-=======
-    // ================================
-    //   PÁGINAS INERTIA (VIEW)
-    // ================================
-    Route::get('/', fn () => Inertia::render('Admin/Dashboard'))
-        ->name('dashboard');
-
-    Route::get('/reservas', fn () => Inertia::render('Admin/RservasAdmin'))
-        ->name('reservas');
-
-    Route::get('/comentarios', fn () => Inertia::render('Admin/Comentarios'))
-        ->name('comentarios');
->>>>>>> 043ee851010bebaaa4091b4fd3e6b25a442f55d7
 
 
 

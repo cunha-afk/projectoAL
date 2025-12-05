@@ -127,7 +127,7 @@
 // Importa o ref e computed do Vue
 import { ref, computed, onMounted } from "vue";
 import axiosInstance from "../axios"; // Importa a configuração do Axios
-import Navbar from "../Components/NavBar.vue"; // Corrigido: Importando a Navbar corretamente com o @
+import Navbar from "../Components/NavBar.vue";
 
 // Variáveis do Vue
 const checkin = ref("");

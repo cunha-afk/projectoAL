@@ -33,12 +33,19 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
 
             // Dados globais de autenticação para o Inertia
-            'auth' => [
+/*             'auth' => [
                 'user' => $request->user(),
                 'isAdmin' => $request->user()?->hasRole('admin') ?? false,
             ],
+ */
+            'auth' => [
+                'user' => $request->user()
+                ? $request->user()->load('roles:id,name')
+                : null,
 
-            // Mensagens flash (opcional, mas dá jeito)
+                'isAdmin' => $request->user()?->hasRole('admin') ?? false,
+            ],
+            // Mensagens flash
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error'   => fn () => $request->session()->get('error'),
