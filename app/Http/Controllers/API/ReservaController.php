@@ -62,7 +62,11 @@ class ReservaController extends Controller
 
         $reserva = Reserva::create($data);
 
-        return response()->json($reserva->load(['user', 'alojamento']), 201);
+        return response()->json([
+            'reserva' => $reserva->load(['user', 'alojamento']),
+            'redirect' => route('checkout', $reserva->id)
+        ], 201);
+
     }
 
     public function update(Request $request, $id)
@@ -234,5 +238,13 @@ class ReservaController extends Controller
 
         return $referencia;
     }
+
+    public function minhasReservas(Request $request)
+{
+    return Reserva::where('user_id', $request->user()->id)
+        ->with(['alojamento.fotos'])
+        ->orderBy('data_inicio', 'desc')
+        ->get();
+}
 }
 

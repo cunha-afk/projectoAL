@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Reserva;
+use App\Models\Pagamento;
 use App\Services\EasypayService;
 use Illuminate\Http\Request;
 
@@ -17,7 +18,7 @@ class PaymentController extends Controller
     }
 
     /**
-     * Criar pagamento para uma reserva
+     * Criar pagamento real com ligação BD
      */
     public function checkout($reservaId)
     {
@@ -27,57 +28,92 @@ class PaymentController extends Controller
             return response()->json(['message' => 'Reserva já paga.'], 400);
         }
 
-        $result = $this->easypay->criarPagamento($reserva);
+        // Criar pagamento na BD
+        $pagamento = Pagamento::create([
+            'reserva_id' => $reserva->id,
+            'valor' => $reserva->preco_total,
+            'estado' => 'pendente'
+        ]);
 
-        if (!$result['success']) {
-            return response()->json(['message' => 'Erro ao criar pagamento', 'error' => $result['error']], 500);
+        // Criar pagamento no Easypay
+        $result = $this->easypay->createPayment([
+            'id' => $pagamento->id,
+            'value' => $reserva->preco_total,
+            'description' => "Reserva #" . $reserva->id
+        ]);
+
+        if (!$result || !isset($result['key'], $result['url'])) {
+            return response()->json([
+                'message' => 'Erro ao criar pagamento'
+            ], 500);
         }
 
-        // Guardar o código de pagamento
-        $reserva->update(['estado' => 'aguardar_pagamento']);
+        // Guardar chave easypay
+        $pagamento->update([
+            'payment_key' => $result['key']
+        ]);
 
         return response()->json([
-            'message' => 'Pagamento criado com sucesso',
-            'pagamento' => $result['data'],
+            'payment_url' => $result['url']
         ]);
     }
 
     /**
-     * Verificar o estado de um pagamento
+     * Verificar estado do pagamento
      */
-    public function status(Request $request, $paymentKey)
+    public function status($paymentKey)
     {
-        $result = $this->easypay->verificarPagamento($paymentKey);
+        $pagamento = Pagamento::where('payment_key', $paymentKey)->firstOrFail();
 
-        if (!$result['success']) {
-            return response()->json(['message' => 'Erro ao verificar pagamento', 'error' => $result['error']], 500);
-        }
+        $result = $this->easypay->checkPayment($paymentKey);
 
-        return response()->json($result['data']);
+        return response()->json($result);
     }
 
     /**
-     * Webhook de confirmação da Easypay
+     * Webhook — Easypay confirma pagamento
      */
     public function webhook(Request $request)
     {
-        $payload = $request->all();
+        $key = $request->input('key');
+        $status = $request->input('status');
 
-        if (($payload['status'] ?? '') === 'paid') {
-            $reservaId = str_replace('reserva-', '', $payload['key']);
-            $reserva = Reserva::find($reservaId);
+        $pagamento = Pagamento::where('payment_key', $key)->first();
 
-            if ($reserva) {
-                $reserva->update(['estado' => 'confirmada']);
-            }
+        if (!$pagamento) {
+            return response()->json(['error' => 'Pagamento não encontrado'], 404);
         }
 
-        return response()->json(['status' => 'ok']);
+        if ($status === 'paid') {
+            $pagamento->update(['estado' => 'pago']);
+            $pagamento->reserva->update(['estado' => 'confirmada']);
+        } else {
+            $pagamento->update(['estado' => 'falhou']);
+        }
+
+        return response()->json(['success' => true]);
     }
 
     public function index()
     {
-        return response()->json(\App\Models\Reserva::with('user', 'alojamento')->get());
+        return response()->json(
+            Pagamento::with('reserva.user', 'reserva.alojamento')->get()
+        );
     }
+    public function mbway(Request $request, $reservaId)
+    {
+        $reserva = Reserva::findOrFail($reservaId);
 
+        $request->validate([
+            'phone' => 'required|digits:9'
+        ]);
+
+        $result = $this->easypay->solicitarMBWay($reserva, $request->phone);
+
+        if (!$result['success']) {
+            return response()->json(['error' => $result['error']], 400);
+        }
+
+        return response()->json(['message' => 'Pedido MBWay enviado']);
+    }
 }

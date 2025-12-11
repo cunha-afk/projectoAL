@@ -23,4 +23,6 @@ class Alojamento extends Model
     public function fotos() { return $this->hasMany(Foto::class); }
     public function videos() { return $this->hasMany(Video::class); }
     public function bloqueios() { return $this->hasMany(Bloqueio::class); }
+
+    
 }

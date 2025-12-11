@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router';
+/* import { createRouter, createWebHistory } from 'vue-router';
 
 // Importando os componentes de página
 import Home from './Pages/Home.vue';
@@ -20,4 +20,4 @@ const router = createRouter({
   routes,
 });
 
-export default router;
+export default router; */

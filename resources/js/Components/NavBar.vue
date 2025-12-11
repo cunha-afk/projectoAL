@@ -59,16 +59,10 @@ const currentUrl = page.url;
         <li>
           <Link
             href="/alojamentos"
-            :class="currentUrl.startsWith('/alojamentos') ? 'text-accent underline' : 'hover:text-accent'"
-          >Alojamentos</Link>
+            :class="currentUrl.startsWith('/quartos') ? 'text-accent underline' : 'hover:text-accent'"
+          >Quartos</Link>
         </li>
 
-        <li>
-          <Link
-            href="/reservas"
-            :class="currentUrl.startsWith('/reservas') ? 'text-accent underline' : 'hover:text-accent'"
-          >Reservas</Link>
-        </li>
 
         <li>
           <Link
@@ -123,6 +117,12 @@ const currentUrl = page.url;
               class="block px-4 py-2 hover:bg-gray-100"
             >
               Perfil
+            </Link>
+            <Link
+              href="/perfil/reservas"
+              class="block px-4 py-2 hover:bg-gray-100"
+            >
+            Minhas Reservas
             </Link>
 
             <button

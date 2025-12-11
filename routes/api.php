@@ -6,38 +6,29 @@ use App\Http\Controllers\Api\MeteoController;
 use App\Http\Controllers\Api\ReservaController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\CurrencyController;
-use App\Http\Controllers\API\AuthController;
-use App\Http\Controllers\API\AlojamentoController;
-use App\Http\Controllers\API\ComentarioController;
-use App\Http\Controllers\API\AdminController;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\AlojamentoController;
+use App\Http\Controllers\Api\ComentarioController;
 use App\Http\Controllers\Admin\ComentariosController;
 use App\Http\Controllers\Admin\UtilizadoresController;
 
+/*
+|--------------------------------------------------------------------------
+| Rotas Públicas
+|--------------------------------------------------------------------------
+*/
 
-//  Rota para obter o utilizador autenticado
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
-
-//  API pública - Meteo
 Route::get('/public/meteo', [MeteoController::class, 'index']);
-
-// Conversão de moedas
 Route::get('/public/conversao', [CurrencyController::class, 'convert']);
 
-// Alojamentos (públicos)
 Route::get('/alojamentos', [AlojamentoController::class, 'index']);
 Route::get('/alojamentos/{id}', [AlojamentoController::class, 'show']);
 
-// Verificar disponibilidade de alojamento (público)
 Route::post('/reservas/available/{alojamentoId}', [ReservaController::class, 'available']);
 
-// Rotas de autenticação (públicas)
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
-// Comentários (públicos - leitura)
 Route::get('/comentarios', [ComentarioController::class, 'index']);
 Route::get('/comentarios/{id}', [ComentarioController::class, 'show']);
 
@@ -47,26 +38,22 @@ Route::get('/comentarios/{id}', [ComentarioController::class, 'show']);
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('auth:sanctum')->group(function() {
-    
-    // Obter utilizador autenticado
-    Route::get('/user', function (Request $request) {
-        return $request->user();
-    });
+Route::middleware('auth:sanctum')->group(function () {
 
-    // Criar nova reserva
+    Route::get('/user', fn(Request $request) => $request->user());
+
+    // Reservas
     Route::post('/reservas', [ReservaController::class, 'store']);
 
-    // Reservas do utilizador
-    Route::prefix('reservas')->group(function() {
-        Route::get('/me', [ReservaController::class, 'myReservations']);
+    Route::prefix('reservas')->group(function () {
+        Route::get('/me', [ReservaController::class, 'minhasReservas']);
         Route::get('/{id}', [ReservaController::class, 'show']);
         Route::put('/{id}', [ReservaController::class, 'update']);
         Route::delete('/{id}', [ReservaController::class, 'destroy']);
         Route::post('/{reserva}/cancel', [ReservaController::class, 'cancel']);
     });
 
-    // Comentários (criar)
+    // Comentários
     Route::post('/comentarios', [ComentarioController::class, 'store']);
     Route::put('/comentarios/{id}', [ComentarioController::class, 'update']);
     Route::delete('/comentarios/{id}', [ComentarioController::class, 'destroy']);
@@ -75,13 +62,16 @@ Route::middleware('auth:sanctum')->group(function() {
     Route::prefix('pagamentos')->group(function () {
         Route::post('/checkout/{reservaId}', [PaymentController::class, 'checkout']);
         Route::get('/status/{paymentKey}', [PaymentController::class, 'status']);
-        Route::post('/webhook', [PaymentController::class, 'webhook']);
+        Route::post('/mbway/{reservaId}', [PaymentController::class, 'mbway']);
     });
+
+    // Logout
+    Route::post('/logout', [AuthController::class, 'logout']);
 });
 
 /*
 |--------------------------------------------------------------------------
-| Webhooks (Sem autenticação)
+| Webhook do Easypay (PÚBLICO)
 |--------------------------------------------------------------------------
 */
 
@@ -89,50 +79,29 @@ Route::post('/pagamentos/webhook', [PaymentController::class, 'webhook']);
 
 /*
 |--------------------------------------------------------------------------
-| Rotas Admin - OPÇÃO 1: Sem middleware de role (testa primeiro)
+| Rotas Admin
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('auth:sanctum')
-    ->prefix('admin')
-    ->group(function () {
+Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
 
-        // Reservas Admin
-        Route::prefix('reservas')->group(function() {
-            Route::get('/', [ReservaController::class, 'indexAdmin']);
-            Route::patch('/{reserva}/status', [ReservaController::class, 'updateStatus']);
-        });
-
-        // Comentários Admin
-        Route::prefix('comentarios')->group(function() {
-            Route::get('/', [ComentariosController::class, 'index']);
-            Route::delete('/{id}', [ComentariosController::class, 'destroy']);
-            Route::patch('/{id}/toggle', [ComentariosController::class, 'toggleAprovado']);
-        });
-
-        
-       // Route::apiResource('utilizadores', UtilizadoresController::class)->except(['create', 'edit']);
-        // Isto cria:
-        // GET    /api/admin/utilizadores
-        // POST   /api/admin/utilizadores
-        // GET    /api/admin/utilizadores/{user}
-        // PUT    /api/admin/utilizadores/{user}
-        // PATCH  /api/admin/utilizadores/{user}
-        // DELETE /api/admin/utilizadores/{user};
-
-        // Alojamentos Admin (se necessário)
-        // Route::apiResource('alojamentos', AlojamentoController::class)->except(['index', 'show']);
-    
-        // Alojamentos Admin
-        Route::apiResource('alojamentos', AlojamentoController::class)->except(['index', 'show']);
+    // Reservas admin
+    Route::prefix('reservas')->group(function () {
+        Route::get('/', [ReservaController::class, 'indexAdmin']);
+        Route::patch('/{reserva}/status', [ReservaController::class, 'updateStatus']);
     });
 
-// ⚠️ SE PRECISARES DO MIDDLEWARE 'role:admin', CRIA UM MIDDLEWARE CUSTOMIZADO:
-// php artisan make:middleware EnsureUserIsAdmin
-// Depois adiciona em bootstrap/app.php (Laravel 11+):
-// ->withMiddleware(function (Middleware $middleware) {
-//     $middleware->alias([
-//         'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
-//     ]);
-// })
-// E usa: ->middleware(['auth:sanctum', 'admin'])
+    // Comentários admin
+    Route::prefix('comentarios')->group(function () {
+        Route::get('/', [ComentariosController::class, 'index']);
+        Route::delete('/{id}', [ComentariosController::class, 'destroy']);
+        Route::patch('/{id}/toggle', [ComentariosController::class, 'toggleAprovado']);
+    });
+
+    // Utilizadores admin
+    Route::apiResource('utilizadores', UtilizadoresController::class);
+
+    // Alojamentos admin
+    Route::apiResource('alojamentos', AlojamentoController::class)->except(['index', 'show']);
+});
+

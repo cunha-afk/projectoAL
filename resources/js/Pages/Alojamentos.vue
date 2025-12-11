@@ -1,137 +1,142 @@
+<script setup>
+import { ref, onMounted } from "vue";
+import { Link, usePage } from "@inertiajs/vue3";
+import Navbar from "../Components/NavBar.vue";
+
+const page = usePage();
+const alojamentos = ref(page.props.alojamentos ?? []);
+
+// índice da foto atual por alojamento
+const currentPhotoIndex = ref({});
+
+// devolve a foto atual
+const getCurrentPhoto = (alojamento) => {
+  const fotos = alojamento.fotos || [];
+  if (!fotos.length) return null;
+
+  const index = currentPhotoIndex.value[alojamento.id] ?? 0;
+  return fotos[index];
+};
+
+// próxima foto
+const nextPhoto = (alojamento) => {
+  const fotos = alojamento.fotos || [];
+  if (!fotos.length) return;
+
+  const actual = currentPhotoIndex.value[alojamento.id] ?? 0;
+  const next = (actual + 1) % fotos.length;
+
+  currentPhotoIndex.value = {
+    ...currentPhotoIndex.value,
+    [alojamento.id]: next,
+  };
+};
+
+// foto anterior
+const prevPhoto = (alojamento) => {
+  const fotos = alojamento.fotos || [];
+  if (!fotos.length) return;
+
+  const actual = currentPhotoIndex.value[alojamento.id] ?? 0;
+  const prev = (actual - 1 + fotos.length) % fotos.length;
+
+  currentPhotoIndex.value = {
+    ...currentPhotoIndex.value,
+    [alojamento.id]: prev,
+  };
+};
+</script>
+
 <template>
-  <div class="min-h-screen bg-white">
-    <!-- Navbar -->
+  <div class="min-h-screen bg-gray-50 text-dark">
     <Navbar />
 
-    <!-- Header -->
-    <header class="bg-primary text-white py-4">
-      <div class="max-w-7xl mx-auto px-6">
-        <h1 class="text-3xl font-semibold">{{ alojamento.titulo }}</h1>
-      </div>
-    </header>
+    <main class="max-w-7xl mx-auto px-6 pt-28 pb-16">
+      <h1 class="text-5xl font-serif font-bold text-center mb-10">Alojamentos</h1>
 
-    <!-- Detalhes do Alojamento -->
-    <section class="py-8 px-6 md:px-20">
-      <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10">
-        <div>
-          <img :src="alojamento.imagem" alt="Alojamento" class="w-full h-96 object-cover rounded-lg shadow-md" />
-        </div>
-        <div class="space-y-4">
-          <p class="text-lg">{{ alojamento.descricao }}</p>
-          <p class="text-xl font-semibold text-accent">{{ alojamento.preco }}€/noite</p>
+      <!-- GRID DE 4 -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div
+          v-for="q in alojamentos"
+          :key="q.id"
+          class="bg-white rounded-xl shadow overflow-hidden hover:scale-[1.02] transition"
+        >
+          <!-- IMAGEM -->
+          <div class="relative h-56 bg-gray-200 overflow-hidden">
+            <template v-if="q.fotos?.length">
+              <img
+                :src="getCurrentPhoto(q)?.url"
+                class="w-full h-full object-cover"
+              />
 
-          <!-- Formulário de Reserva -->
-          <div class="mt-8">
-            <h2 class="text-2xl font-semibold">Fazer Reserva</h2>
-            <form @submit.prevent="reservar">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label for="dataInicio" class="block text-sm">Data de Início</label>
-                  <input type="date" id="dataInicio" v-model="reserva.dataInicio" class="w-full mt-1 p-2 border rounded" required />
-                </div>
-                <div>
-                  <label for="dataFim" class="block text-sm">Data de Fim</label>
-                  <input type="date" id="dataFim" v-model="reserva.dataFim" class="w-full mt-1 p-2 border rounded" required />
-                </div>
-              </div>
-
-              <!-- Verificação de erro no formato das datas -->
-              <p v-if="erroDatas" class="text-red-500 text-sm mt-2">A data de fim não pode ser anterior à data de início.</p>
-
-              <button type="submit" :disabled="isLoading" class="mt-4 bg-accent text-dark font-semibold px-6 py-3 rounded-lg shadow hover:bg-yellow-300 transition">
-                {{ isLoading ? 'Aguarde...' : 'Reservar Agora' }}
+              <!-- SETAS -->
+              <button
+                v-if="q.fotos.length > 1"
+                @click.stop="prevPhoto(q)"
+                class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white w-8 h-8 rounded-full flex items-center justify-center"
+              >
+                ‹
               </button>
-            </form>
-            <p v-if="erro" class="text-red-500 mt-4">{{ erro }}</p>
-            <p v-if="mensagem" class="text-green-600 mt-4">{{ mensagem }}</p>
+
+              <button
+                v-if="q.fotos.length > 1"
+                @click.stop="nextPhoto(q)"
+                class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white w-8 h-8 rounded-full flex items-center justify-center"
+              >
+                ›
+              </button>
+
+              <!-- INDICADOR -->
+              <div
+                v-if="q.fotos.length > 1"
+                class="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded"
+              >
+                {{ (currentPhotoIndex[q.id] ?? 0) + 1 }}/{{ q.fotos.length }}
+              </div>
+            </template>
+
+            <span v-else class="text-gray-500 flex items-center justify-center w-full h-full">
+              Sem foto
+            </span>
+          </div>
+
+          <!-- TEXTO -->
+          <div class="p-4 flex flex-col">
+            <h2 class="font-bold text-xl mb-2">{{ q.nome }}</h2>
+
+            <p class="text-gray-600 text-sm line-clamp-3 mb-3">
+              {{ q.descricao }}
+            </p>
+
+            <p class="text-accent font-bold mb-4">
+              {{ q.preco }}€
+              <span class="text-gray-500 text-sm font-normal">/ noite</span>
+            </p>
+
+            <Link
+              :href="`/alojamentos/${q.id}`"
+              class="mt-auto bg-primary text-white text-center py-2 rounded-md hover:bg-secondary transition"
+            >
+              Ver Detalhes
+            </Link>
           </div>
         </div>
       </div>
-    </section>
+    </main>
   </div>
 </template>
 
-
-<script setup>
-import { ref, onMounted, watch } from 'vue';
-import axiosInstance from '../axios'; // Importa a configuração do Axios
-import Navbar from '../Components/NavBar.vue'; // Corrigido: Importando a Navbar corretamente com o @
-
-// Armazenar dados do alojamento e do formulário de reserva
-const alojamento = ref({});
-const reserva = ref({
-  dataInicio: '',
-  dataFim: '',
-});
-
-const isLoading = ref(false);
-const erro = ref('');
-const mensagem = ref('');
-const erroDatas = ref(false);
-
-// Obter o ID do alojamento da URL
-const alojamentoId = 1;  // Exemplo, pode ser dinâmico com o useRoute()
-
-// Função para buscar os dados do alojamento
-const fetchAlojamento = async () => {
-  try {
-    const response = await axiosInstance.get(`/alojamentos/${alojamentoId}`);
-    alojamento.value = response.data; // Salva os dados do alojamento
-  } catch (error) {
-    console.error('Erro ao buscar alojamento', error);
-  }
-};
-
-// Verifica se as datas são válidas
-watch(() => reserva.dataFim, (newDataFim) => {
-  if (newDataFim && reserva.dataInicio && new Date(newDataFim) < new Date(reserva.dataInicio)) {
-    erroDatas.value = true;
-  } else {
-    erroDatas.value = false;
-  }
-});
-
-// Função para fazer a reserva
-const reservar = async () => {
-  if (erroDatas.value) return;
-
-  isLoading.value = true;
-  erro.value = ''; // Resetando erro antes de tentar novamente
-
-  try {
-    const response = await axiosInstance.post('/reservas', {
-      alojamento_id: alojamentoId,
-      data_inicio: reserva.value.dataInicio,
-      data_fim: reserva.value.dataFim,
-    });
-    mensagem.value = 'Reserva feita com sucesso!';
-    erro.value = '';
-    router.push('/reservas'); // Redireciona para a página de reservas
-  } catch (error) {
-    console.error('Erro ao fazer reserva', error);
-    erro.value = 'Erro ao fazer a reserva. Tente novamente.';
-    mensagem.value = '';
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-// Buscar dados do alojamento quando o componente for montado
-onMounted(() => {
-  fetchAlojamento();
-});
-</script>
-
 <style scoped>
+.text-dark {
+  color: #616160;
+}
 .bg-primary {
   background-color: #9faea0;
 }
-
+.bg-secondary {
+  background-color: #b9bda5;
+}
 .text-accent {
   color: #e6e019;
-}
-
-.text-dark {
-  color: #616160;
 }
 </style>
