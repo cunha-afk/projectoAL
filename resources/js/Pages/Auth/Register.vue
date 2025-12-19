@@ -52,6 +52,7 @@ const submit = () => {
             class="w-full border border-primary rounded-md p-2 bg-secondary/50 focus:ring-2 focus:ring-accent focus:outline-none"
             required
           />
+          <InputError class="mt-2" :message="form.errors.name" />
         </div>
 
         <div>
@@ -62,6 +63,7 @@ const submit = () => {
             class="w-full border border-primary rounded-md p-2 bg-secondary/50 focus:ring-2 focus:ring-accent focus:outline-none"
             required
           />
+          <InputError class="mt-2" :message="form.errors.email" />
         </div>
 
         <div>
@@ -72,6 +74,7 @@ const submit = () => {
             class="w-full border border-primary rounded-md p-2 bg-secondary/50 focus:ring-2 focus:ring-accent focus:outline-none"
             required
           />
+          <InputError class="mt-2" :message="form.errors.password" />
         </div>
 
         <div>
@@ -82,8 +85,9 @@ const submit = () => {
             class="w-full border border-primary rounded-md p-2 bg-secondary/50 focus:ring-2 focus:ring-accent focus:outline-none"
             required
           />
+          <InputError class="mt-2" :message="form.errors.password_confirmation" />
         </div>
-
+      
         <button
           type="submit"
           class="w-full py-2 bg-primary hover:bg-dark transition text-white rounded-md shadow-md"

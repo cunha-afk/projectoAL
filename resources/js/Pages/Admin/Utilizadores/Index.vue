@@ -65,6 +65,7 @@ onMounted(() => fetchUsers())
           <th class="p-3">Email</th>
           <th class="p-3">Criado em</th>
           <th class="p-3 text-center">Papéis</th>
+          <th class="p-3 text-center">Estado</th>
           <th class="p-3 text-center w-100">Ações</th>
         </tr>
       </thead>

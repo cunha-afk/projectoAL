@@ -7,6 +7,8 @@ use App\Models\Alojamento;
 use App\Http\Controllers\Admin\UtilizadoresController;
 use App\Http\Controllers\Admin\AlojamentoController;
 use App\Http\Controllers\Admin\ComentarioController;
+use App\Http\Controllers\Admin\ReservaController;
+use App\Http\Controllers\CompleteRegistrationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,7 +22,7 @@ Route::get('/contactos', fn() => Inertia::render('Contactos'));
 
 /*
 |--------------------------------------------------------------------------
-| Página de Perfil (Utilizador Autenticado)
+| paginas utilizador (validaçao)
 |--------------------------------------------------------------------------
 */
 
@@ -110,11 +112,14 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         'role:admin'
     ])->prefix('admin')->name('admin.')->group(function () {
 
-    // Dashboard Admin
-    Route::get('/', fn () => Inertia::render('Admin/Dashboard'))->name('dashboard');
-    Route::get('/reservas', fn () => Inertia::render('Admin/ReservasAdmin'))->name('reservas');
-    Route::get('/alojamento', fn () => Inertia::render('Admin/AlojamentoAdmin'))->name('alojamento');
-    Route::get('/comentarios', fn () => Inertia::render('Admin/ComentariosAdmin'))->name('comentarios');
+        //admin  (DASHBOARD)
+        Route::get('/', fn () => Inertia::render('Admin/Dashboard'))
+            ->name('dashboard');
+
+        Route::get('/comentarios', fn () => Inertia::render('Admin/ComentariosAdmin'))
+            ->name('comentarios');
+
+
 
     /*
     |--------------------------------------------------------------------------
@@ -147,6 +152,44 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     Route::get('/alojamentos/{id}/editar', fn ($id) =>
         Inertia::render('Admin/Alojamentos/Edit', ['id' => $id])
     )->name('alojamentos.edit');
+
+      // ---------- Reservas (PAGES) ----------
+
+    Route::get('/reservas', fn () =>
+        Inertia::render('Admin/Reservas/Index')   // <--- o teu componente atual
+    )->name('reservas');
+
+    // Página criar reserva
+    Route::get('/reservas/criar', fn () =>
+        Inertia::render('Admin/Reservas/Create')
+    )->name('reservas.create');
+
+    // Página editar reserva
+    Route::get('/reservas/{id}/editar', fn ($id) =>
+        Inertia::render('Admin/Reservas/Edit', ['id' => $id])
+    )->name('reservas.edit');
+
+
+
+
+      // ---------- Reservas (PAGES) ----------
+
+    Route::get('/reservas', fn () =>
+        Inertia::render('Admin/Reservas/Index')   // <--- o teu componente atual
+    )->name('reservas');
+
+    // Página criar reserva
+    Route::get('/reservas/criar', fn () =>
+        Inertia::render('Admin/Reservas/Create')
+    )->name('reservas.create');
+
+    // Página editar reserva
+    Route::get('/reservas/{id}/editar', fn ($id) =>
+        Inertia::render('Admin/Reservas/Edit', ['id' => $id])
+    )->name('reservas.edit');
+
+
+
 
     /*
     |--------------------------------------------------------------------------

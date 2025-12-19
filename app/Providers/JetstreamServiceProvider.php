@@ -9,6 +9,8 @@ use Laravel\Fortify\Fortify;
 use Laravel\Jetstream\Jetstream;
 use Laravel\Fortify\Contracts\LoginResponse;
 use App\Actions\Fortify\RedirectAfterLogin;
+use Laravel\Fortify\Contracts\RegisterResponse;
+use App\Actions\Fortify\RedirectAfterRegister;
 
 class JetstreamServiceProvider extends ServiceProvider
 {
@@ -21,6 +23,11 @@ class JetstreamServiceProvider extends ServiceProvider
             LoginResponse::class,
             RedirectAfterLogin::class
         );
+        
+        $this->app->singleton(
+            RegisterResponse::class,
+            RedirectAfterRegister::class
+        );  
     }
 
     /**

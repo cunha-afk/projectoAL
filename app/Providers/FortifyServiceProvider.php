@@ -1,7 +1,9 @@
 <?php
 
 namespace App\Providers;
-
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
 use App\Actions\Fortify\UpdateUserPassword;
@@ -34,6 +36,31 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::updateUserPasswordsUsing(UpdateUserPassword::class);
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
         Fortify::redirectUserForTwoFactorAuthenticationUsing(RedirectIfTwoFactorAuthenticatable::class);
+
+        Fortify::authenticateUsing(function (Request $request) {
+        $request->validate([
+        'email' => ['required', 'string', 'email'],
+        'password' => ['required', 'string'],
+    ]);
+
+    $user = User::where('email', $request->email)->first();
+
+            // 1) Credenciais inválidas
+            if (! $user || ! Hash::check($request->password, $user->password)) {
+                throw ValidationException::withMessages([
+                    'email' => 'Email ou palavra-passe errados.',
+                ]);
+            }
+
+            // 2) Conta pendente (não aprovada)
+            if (! $user->is_approved) {
+                throw ValidationException::withMessages([
+                    'email' => 'A tua conta está pendente. Conclui o registo no email indicado (telemóvel + NIF) para a ativar.',
+                ]);
+            }
+
+            return $user;
+});
 
         RateLimiter::for('login', function (Request $request) {
             $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())).'|'.$request->ip());

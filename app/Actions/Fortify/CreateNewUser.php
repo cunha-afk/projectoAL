@@ -32,6 +32,7 @@ class CreateNewUser implements CreatesNewUsers
             'name' => $input['name'],
             'email' => $input['email'],
             'password' => Hash::make($input['password']),
+            'is_approved' => false,
         ]);
 
         // 2️⃣ Garantir que o role "cliente" existe com o guard certo
