@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\ComentarioController as AdminComentariosControlle
 use App\Http\Controllers\Admin\UtilizadoresController;
 use App\Http\Controllers\Admin\AlojamentoController as AdminAlojamentoController;
 use App\Http\Controllers\Admin\ReservaController as AdminReservaController;
+use App\Http\Controllers\Admin\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -115,10 +116,15 @@ Route::middleware(['auth:sanctum','role:admin'])
         Route::patch('/reservas/{reserva}/cancelar', [AdminReservaController::class, 'cancelar']);
         Route::delete('/reservas/{reserva}', [AdminReservaController::class, 'destroy']);
 
+
+          // ---------- comentarios (PAGES) ----------
          Route::get('/comentarios', [AdminComentariosController::class, 'index']);
         Route::post('/comentarios/{comentario}/aprovar', [AdminComentariosController::class, 'aprovar']);
         Route::delete('/comentarios/{comentario}', [AdminComentariosController::class, 'destroy']);
         Route::post('/comentarios/{comentario}/responder', [AdminComentariosController::class, 'responder']);
+
+          // ---------- dashboard (PAGES) ----------
+           Route::get('/dashboard', [DashboardController::class, 'index']);
     });
 
 

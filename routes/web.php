@@ -26,6 +26,16 @@ Route::get('/contactos', fn() => Inertia::render('Contactos'));
 |--------------------------------------------------------------------------
 */
 
+Route::middleware(['signed', 'throttle:6,1'])->group(function () {
+    Route::get('/complete-registration/{id}/{hash}', [CompleteRegistrationController::class, 'show'])
+        ->name('complete-registration.show');
+
+    Route::post('/complete-registration/{id}/{hash}', [CompleteRegistrationController::class, 'store'])
+        ->name('complete-registration.store');
+});
+
+
+
     Route::middleware([
         'auth:sanctum',
         config('jetstream.auth_session'),
@@ -166,35 +176,3 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
    
     
     
-      // ---------- Reservas (PAGES) ----------
-
-    
-
-
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | API ADMIN (JSON)
-    |--------------------------------------------------------------------------
-    */
-    
-
-        // // Utilizadores API
-        // Route::get('/utilizadores', [UtilizadoresController::class, 'index']);
-        // Route::post('/utilizadores', [UtilizadoresController::class, 'store']);
-        // Route::get('/utilizadores/{user}', [UtilizadoresController::class, 'show']);
-        // Route::put('/utilizadores/{user}', [UtilizadoresController::class, 'update']);
-        // Route::delete('/utilizadores/{user}', [UtilizadoresController::class, 'destroy']);
-
-        // Alojamentos API
-        // Route::get('/alojamentos', [AlojamentoController::class, 'index']);
-        // Route::post('/alojamentos', [AlojamentoController::class, 'store']);
-        // Route::get('/alojamentos/{alojamento}', [AlojamentoController::class, 'show']);
-        // Route::put('/alojamentos/{alojamento}', [AlojamentoController::class, 'update']);
-        // Route::delete('/alojamentos/{alojamento}', [AlojamentoController::class, 'destroy']);
-        // Route::post('/alojamentos/{alojamento}/fotos', [AlojamentoController::class, 'uploadFotos']);
-        // Route::delete('/alojamentos/fotos/{foto}', [AlojamentoController::class, 'deleteFoto']);
-
-        
-
